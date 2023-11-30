@@ -15,7 +15,6 @@ class EmployerInRoom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final roomprovider = Provider.of<RoomsProvider>(context, listen: false);
-
     final lProvider = Provider.of<LoginProvider>(context, listen: false);
     bool validLicense = lProvider.logedinUser.validlicense;
 
@@ -66,6 +65,12 @@ class EmployerInRoom extends StatelessWidget {
                                       onTap: !validLicense
                                           ? null
                                           : () async {
+                                              final menuProvider =
+                                                  Provider.of<SidebarProvider>(
+                                                      context,
+                                                      listen: false);
+                                              menuProvider.selectedMenu =
+                                                  'Home';
                                               await roomprovider
                                                   .readAccountsAssociatedtoEmployer(
                                                       roomprovider
@@ -80,24 +85,26 @@ class EmployerInRoom extends StatelessWidget {
                                                       roomprovider
                                                           .employers[index]
                                                           .employercode,
-                                                      'Employer');
-                                              final menuProvider =
-                                                  Provider.of<SidebarProvider>(
-                                                      context,
-                                                      listen: false);
-                                              menuProvider.selectedMenu =
-                                                  'Home';
-
-                                              Navigator.of(context)
-                                                  .popAndPushNamed("/Home");
+                                                      'Employer')
+                                                  .then((value) => {
+                                                        Navigator.of(context)
+                                                            .popAndPushNamed(
+                                                                "/Home")
+                                                      });
                                             },
                                       child: CustomLogoViewer(
                                           employer: prvView.employers[index]),
                                     ),
-                                    Expanded(
-                                      child: TooltipWithCopy(
-                                          employer: prvView.employers[index]),
-                                    )
+                                    Consumer<LoginProvider>(
+                                        builder: (context, prvRole, child) {
+                                      return !prvRole.isPanelShrinked
+                                          ? Expanded(
+                                              child: TooltipWithCopy(
+                                                  employer:
+                                                      prvView.employers[index]),
+                                            )
+                                          : const Text('');
+                                    })
                                   ]),
                             ),
                           );

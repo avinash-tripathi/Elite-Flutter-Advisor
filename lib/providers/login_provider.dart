@@ -5,29 +5,20 @@ import 'package:advisorapp/models/naics.dart';
 import 'package:advisorapp/models/resetpassword.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginProvider extends ChangeNotifier {
-  // ignore: prefer_final_fields
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final nameController = TextEditingController();
-  final lastnameController = TextEditingController();
-  final worktitleController = TextEditingController();
-  final phoneController = TextEditingController();
-  final workemailController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: <String>[
+    'email',
+    'profile',
+  ]);
+  GoogleSignIn get googleSignIn => _googleSignIn;
 
-  bool _isPanelShrinked = false;
-  bool get isPanelShrinked => _isPanelShrinked;
-  set isPanelShrinked(bool obj) {
-    _isPanelShrinked = obj;
-    notifyListeners();
-  }
+/*    final GoogleSignIn googleSignIn; */
 
-  final GoogleSignIn googleSignIn;
-
-  LoginProvider(this.googleSignIn) {
+  /*  LoginProvider() {
     googleSignIn.onCurrentUserChanged
         .listen((GoogleSignInAccount? account) async {
       // However, in the web...
@@ -35,6 +26,30 @@ class LoginProvider extends ChangeNotifier {
         currentGoogleUser = account;
       }
     });
+  } */
+  // ignore: prefer_final_fields
+  final companydomainController = TextEditingController();
+  final companynameController = TextEditingController();
+
+  final eincodeController = TextEditingController();
+  final companyaddressController = TextEditingController();
+  final companyphoneController = TextEditingController();
+  TextEditingController naicscodeController = TextEditingController();
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final lastnameController = TextEditingController();
+  final worktitleController = TextEditingController();
+  final phoneController = TextEditingController();
+  final mobileController = TextEditingController();
+  final workemailController = TextEditingController();
+
+  bool _isPanelShrinked = false;
+  bool get isPanelShrinked => _isPanelShrinked;
+  set isPanelShrinked(bool obj) {
+    _isPanelShrinked = obj;
+    notifyListeners();
   }
 
   Naics? _selectedNAICSCode;
@@ -113,7 +128,9 @@ class LoginProvider extends ChangeNotifier {
 
   Future<void> googleSignOut() async {
     try {
-      googleSignIn.disconnect();
+      currentGoogleUser = null;
+      _googleSignIn.signOut();
+      _googleSignIn.disconnect();
 
       notifyListeners();
     } catch (e) {
@@ -262,16 +279,14 @@ class LoginProvider extends ChangeNotifier {
 
   Future<void> handleGoogleSignIn() async {
     try {
-      isGoogleVerified = true;
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      _currentGoogleUser = googleUser;
-
-      isGoogleVerified = false;
+      _isGoogleVerified = true;
+      await _googleSignIn.signIn();
+      _isGoogleVerified = false;
       notifyListeners();
     } catch (error) {
-      isGoogleVerified = false;
-      print(error);
+      _isGoogleVerified = false;
     }
+    return null;
   }
 
   Future<void> getLoggedInUser() async {

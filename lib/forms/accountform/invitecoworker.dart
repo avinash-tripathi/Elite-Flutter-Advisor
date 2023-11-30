@@ -102,10 +102,8 @@ class InviteCoworker extends StatelessWidget {
                                                 SizedBox(
                                                   width: screenWidth,
                                                   child: TextFormField(
-                                                    readOnly: prvaddOther
-                                                        .advisorinvites[index]
-                                                        .invitedemail
-                                                        .isNotEmpty,
+                                                    readOnly: !prvaddOther
+                                                        .invitingNew,
                                                     initialValue: prvaddOther
                                                         .advisorinvites[index]
                                                         .invitedemail,
@@ -251,10 +249,15 @@ class InviteCoworker extends StatelessWidget {
                                                   child: SizedBox(
                                                     width: 100,
                                                     child: prvaddOther
-                                                                .advisorinvites[
-                                                                    index]
-                                                                .invitationstatus ==
-                                                            ""
+                                                                    .advisorinvites[
+                                                                        index]
+                                                                    .invitationstatus ==
+                                                                "" ||
+                                                            prvaddOther
+                                                                    .advisorinvites[
+                                                                        index]
+                                                                    .invitationstatus ==
+                                                                "Send"
                                                         ? ElevatedButton(
                                                             onPressed: isSending
                                                                 ? null
@@ -360,6 +363,7 @@ class InviteCoworker extends StatelessWidget {
                                                                               showSnackBar(context, validationFailMessage);
                                                                               return;
                                                                             }
+
                                                                             AdvisorInvite
                                                                                 currInv =
                                                                                 prvaddOther.advisorinvites[index];

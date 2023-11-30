@@ -39,7 +39,7 @@ class TooltipWithCopy extends StatelessWidget {
         onTap: () {
           Clipboard.setData(ClipboardData(
               text:
-                  'Company Name: ${objCompany.companyname}\nCompany Address: ${objCompany.companyaddress}\nCompany ContactNo: ${objCompany.companyphoneno}\nNaics Code: ${objCompany.naicscode}\nCategory Name: ${objCategory.categoryname}\nType Name: ${objType.typename}'));
+                  'Company Name: ${objCompany.companyname}\nCompany Address: ${objCompany.companyaddress}\nCompany ContactNo: ${objCompany.companyphoneno}\nNaics Code: ${objCompany.naicscode}\nCategory Name: ${objCategory.categoryname}\nCompany Type: ${objType.typename}'));
           const snackBar = SnackBar(
             content: Text('Copied to clipboard'),
           );

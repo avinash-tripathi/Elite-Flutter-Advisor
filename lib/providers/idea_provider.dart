@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:advisorapp/models/idea.dart';
 import 'package:advisorapp/models/vote.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
+import 'dart:html' as html;
 
 class IdeaProvider extends ChangeNotifier {
   bool addingIdea = false;
@@ -9,6 +12,36 @@ class IdeaProvider extends ChangeNotifier {
   List<Idea> _ideas = [];
   List<Idea> get ideas => _ideas;
   TextEditingController ideaController = TextEditingController();
+  TextEditingController descController = TextEditingController();
+
+  Idea? _newIdea;
+  Idea? get newIdea => _newIdea;
+  set newIdea(Idea? obj) {
+    _newIdea = obj;
+    notifyListeners();
+  }
+
+  Future<Idea> pickFile(Idea obj) async {
+    final input = html.InputElement(type: 'file');
+    // MyFile objdummy = MyFile(name: '', base64: '', fileextension: '');
+    input.click();
+    await input.onChange.first;
+    if (input.files!.isNotEmpty) {
+      final file = input.files?.first;
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(file!);
+      await reader.onLoad.first;
+      final encoded = base64Encode(reader.result as List<int>);
+      final fileext = ".${file.name.toString().split('.')[1]}";
+
+      obj.ideafilename = file.name;
+      obj.fileextension = fileext;
+      obj.filebase64 = encoded;
+      _newIdea = obj;
+      notifyListeners();
+    }
+    return obj;
+  }
 
   Future<void> getIdeas() async {
     try {

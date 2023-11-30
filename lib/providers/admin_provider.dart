@@ -1,5 +1,6 @@
 import 'package:advisorapp/models/account.dart';
 import 'package:advisorapp/models/admin/paymentmethod/attachedpaymentmethod.dart';
+import 'package:advisorapp/models/admin/paymentmethod/invoice.dart';
 import 'package:advisorapp/models/admin/setupIntent/inputsetupintent.dart';
 import 'package:advisorapp/models/admin/subscription.dart';
 import 'package:advisorapp/models/admin/subscriptionLicense.dart';
@@ -10,8 +11,39 @@ import 'package:advisorapp/models/stripe/stripesession.dart';
 import 'package:advisorapp/service/adminservice.dart';
 import 'package:advisorapp/service/stripeservice.dart';
 import 'package:flutter/material.dart';
+import 'package:advisorapp/models/role.dart';
 
 class AdminProvider extends ChangeNotifier {
+  bool _updatestatus = false;
+
+  Future<void> updateStatus(accountcode, userstatus) async {
+    try {
+      _updatestatus = true;
+
+      await AdminService().updateStatus(accountcode, userstatus);
+      _updatestatus = false;
+
+      notifyListeners();
+    } catch (e) {
+      _updatestatus = false;
+    }
+  }
+
+  bool _updaterole = false;
+
+  Future<void> updateRole(accountcode, accountrole) async {
+    try {
+      _updaterole = true;
+
+      await AdminService().updateRole(accountcode, accountrole);
+      _updaterole = false;
+
+      notifyListeners();
+    } catch (e) {
+      _updaterole = false;
+    }
+  }
+
   Map<int, bool> _selectedSubscription = {};
 
   void selectedSubscription(int index, bool isSelected) {
@@ -46,6 +78,21 @@ class AdminProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       readingPaymentMethod = false;
+    }
+  }
+
+  bool readingInvoice = false;
+  List<Invoice> _invoices = [];
+  List<Invoice> get invoices => _invoices;
+  Future<void> readInvoices(createdbyaccount) async {
+    try {
+      readingInvoice = true;
+      _invoices = await AdminService().readInvoices(createdbyaccount);
+      readingInvoice = false;
+
+      notifyListeners();
+    } catch (e) {
+      readingInvoice = true;
     }
   }
 
@@ -123,16 +170,14 @@ class AdminProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /*  Future<void> createCheckOutSession(
-      accountcode, createdby, subscriptioncode) async {
-    try {
-      _checkoutsession = (await StripeService()
-          .createCheckOutSession(accountcode, createdby, subscriptioncode))!;
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
-  } */
+  bool _clickedTodownload = false;
+  bool get clickedTodownload => _clickedTodownload;
+
+  set clickedTodownload(bool obj) {
+    _clickedTodownload = obj;
+    notifyListeners();
+  }
+
   Future<void> createCheckOutSession(
       quantity, createdby, subscriptioncode) async {
     try {
@@ -180,6 +225,11 @@ class AdminProvider extends ChangeNotifier {
 
   void setStatus(int index, Status value) {
     subscriptionLicenses[index].accountstatus = value.code;
+    notifyListeners();
+  }
+
+  void setAccountRole(int index, Role value) {
+    subscriptionLicenses[index].accountrole = value;
     notifyListeners();
   }
 }

@@ -5,10 +5,10 @@ import 'package:advisorapp/config/responsive.dart';
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/custom/custom_logoviewer.dart';
 import 'package:advisorapp/custom/custom_tooltip.dart';
-import 'package:advisorapp/forms/employer/employerform.dart';
+
 import 'package:advisorapp/forms/employer/sl_employerform.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
-import 'package:advisorapp/models/companytype.dart';
+
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/partner.dart';
 import 'package:advisorapp/providers/employer_provider.dart';
@@ -268,12 +268,10 @@ class EmployerForms extends StatelessWidget {
                                                                   .then(
                                                                       (value) =>
                                                                           {
-                                                                            /*  prvEmployer
-                                                                        .setEmployerAssistList(), */
                                                                             prvView.readAccountsAssociatedtoEmployer(obj.accountcode,
                                                                                 obj.employercode),
                                                                             prvView.getLaunchStatusList(),
-
+                                                                            prvView.clearActionLaunchPack(),
                                                                             prvView.loadVisibleStatusList(),
                                                                             prvView.setLoadingStatus(index,
                                                                                 false),
@@ -346,6 +344,7 @@ class EmployerForms extends StatelessWidget {
                                                                               {
                                                                                 prvEmployer.getInitialLaunchPack(obj.accountcode, obj.employercode, 'Advisor').then((value) => {
                                                                                       prvEmployer.readAccountsAssociatedtoEmployer(obj.accountcode, obj.employercode),
+                                                                                      prvEmployer.clearActionLaunchPack(),
                                                                                       prvEmployer.getLaunchStatusList(),
                                                                                       prvEmployer.loadVisibleStatusList(),
                                                                                       prvEmployer.setLoadingStatus(index, false),

@@ -1,12 +1,70 @@
 import 'dart:convert';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/models/admin/paymentmethod/attachedpaymentmethod.dart';
+import 'package:advisorapp/models/admin/paymentmethod/invoice.dart';
 import 'package:advisorapp/models/admin/subscription.dart';
 import 'package:advisorapp/models/admin/subscriptionLicense.dart';
 import 'package:http/http.dart' as http;
 
 class AdminService {
   static const serviceURL = webApiserviceURL;
+
+  Future<dynamic> updateStatus(accountcode, userstatus) async {
+    try {
+      Uri uri = Uri.parse("${serviceURL}Advisor/UpdateAdvisorUpdateUserStatus");
+      var objResponse = await http.Client().post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Charset': 'utf-8',
+            "Access-Control-Allow-Origin":
+                "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials":
+                "true", // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+          },
+          body: json
+              .encode({"accountcode": accountcode, "userstatus": userstatus}));
+
+      if (objResponse.statusCode == 200) {
+        return jsonDecode(objResponse.body);
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<dynamic> updateRole(accountcode, accountrole) async {
+    try {
+      Uri uri = Uri.parse("${serviceURL}Advisor/UpdateAdvisorUpdateRole");
+      var objResponse = await http.Client().post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Charset': 'utf-8',
+            "Access-Control-Allow-Origin":
+                "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials":
+                "true", // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+          },
+          body: json.encode(
+              {"accountcode": accountcode, "accountrole": accountrole}));
+
+      if (objResponse.statusCode == 200) {
+        return jsonDecode(objResponse.body);
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<dynamic> deleteAttachedPaymentMethod(
       accountcode, paymentmethodid) async {
     try {
@@ -94,6 +152,39 @@ class AdminService {
             customer: '',
             metadata: {},
           )); */
+    }
+  }
+
+  Future<List<Invoice>> readInvoices(accountcode) async {
+    try {
+      Uri uri = Uri.parse("${serviceURL}Advisor/AdvisorGenerateInvoice");
+      var objResponse = await http.Client().post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Charset': 'utf-8',
+            "Access-Control-Allow-Origin":
+                "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials":
+                "true", // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+          },
+          body: json.encode({"accountcode": accountcode}));
+
+      List<Invoice> list = [];
+      if (objResponse.statusCode == 200) {
+        //List<AdvisorInvite> data = json.decode(objResponse.body);
+        list = (jsonDecode(objResponse.body) as List)
+            .map((slist) => Invoice.fromJson(slist))
+            .toList();
+
+        return list;
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      return [];
     }
   }
 

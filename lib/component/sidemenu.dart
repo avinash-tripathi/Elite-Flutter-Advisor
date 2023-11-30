@@ -16,7 +16,9 @@ import 'package:advisorapp/providers/idea_provider.dart';
 import 'package:advisorapp/providers/launch_provider.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/master_provider.dart';
+import 'package:advisorapp/providers/microsoftAuth_Provider.dart';
 import 'package:advisorapp/providers/partner_provider.dart';
+import 'package:advisorapp/providers/paymentmethod_provider.dart';
 import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/providers/sidebar_provider.dart';
 import 'package:flutter/material.dart';
@@ -394,6 +396,7 @@ class SideMenu extends StatelessWidget {
                         Employer obj = Employer(partners: []);
                         empProvider.selectedEmployer = obj;
                         // empProvider.employers.clear();
+
                         final partnerProvider = Provider.of<PartnerProvider>(
                             context,
                             listen: false);
@@ -402,16 +405,43 @@ class SideMenu extends StatelessWidget {
                         partnerProvider.partners.clear();
                         Partner objPartner = Partner();
                         partnerProvider.selectedPartner = objPartner;
-                        /* final roomProvider =
-                            Provider.of<RoomProvider>(context, listen: false);
-                        roomProvider.employers.clear(); */
 
-                        //lgnProvider.googleSignOut();
                         lgnProvider.logedinUser = Account(rolewithemployer: []);
-
                         lgnProvider.clearLoggedInCredential();
-                        await clearCache(context);
+                        final launchProvider =
+                            Provider.of<LaunchProvider>(context, listen: false);
+                        launchProvider.launchpacks.clear();
+                        launchProvider.selectedLaunchPacks?.clear();
 
+                        final addProvider = Provider.of<AddotherProvider>(
+                            context,
+                            listen: false);
+                        addProvider.advisorinvites.clear();
+                        addProvider.filteredinvites.clear();
+
+                        final roomProvider =
+                            Provider.of<RoomsProvider>(context, listen: false);
+                        roomProvider.employers.clear();
+                        roomProvider.launchpacks.clear();
+
+                        final ideaProvider =
+                            Provider.of<IdeaProvider>(context, listen: false);
+                        ideaProvider.ideas.clear();
+                        ideaProvider.votes.clear();
+                        final adminProvider =
+                            Provider.of<AdminProvider>(context, listen: false);
+                        adminProvider.subscriptionLicenses.clear();
+                        adminProvider.subscriptions.clear();
+
+                        final paymentProvider =
+                            Provider.of<PaymentMethodProvider>(context,
+                                listen: false);
+                        paymentProvider.paymentmethods.clear();
+                        if (lgnProvider.currentGoogleUser != null) {
+                          lgnProvider.googleSignOut();
+                        }
+
+                        await clearCache(context);
                         Navigator.of(context).pushAndRemoveUntil(
                           // the new route
                           MaterialPageRoute(
@@ -458,9 +488,13 @@ class SideMenu extends StatelessWidget {
   }
 
   Future<void> clearCache(BuildContext context) async {
-    Provider.of<LoginProvider>(context, listen: false).clearCachedAccount();
-    Provider.of<LoginProvider>(context, listen: false)
-        .clearLoggedInCredential();
+    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
+    loginProvider.clearCachedAccount();
+    loginProvider.clearLoggedInCredential();
+    if (loginProvider.currentGoogleUser != null) {
+      loginProvider.googleSignOut();
+    }
+
     Provider.of<AddotherProvider>(context, listen: false)
         .advisorinvites
         .clear();
@@ -496,5 +530,10 @@ class SideMenu extends StatelessWidget {
     Provider.of<PartnerProvider>(context, listen: false)
         .invitedPartners
         .clear();
+    final prvMicrosoft =
+        Provider.of<MicrosoftAuthProvider>(context, listen: false);
+    if (prvMicrosoft.accessToken != null) {
+      prvMicrosoft.microsoftLogout();
+    }
   }
 }

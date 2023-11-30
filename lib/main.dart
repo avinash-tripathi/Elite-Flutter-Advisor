@@ -1,4 +1,3 @@
-import 'package:aad_oauth/model/config.dart';
 import 'package:advisorapp/forms/Login/login_screen.dart';
 import 'package:advisorapp/providers/addother_provider.dart';
 import 'package:advisorapp/providers/admin_provider.dart';
@@ -15,22 +14,24 @@ import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/providers/sidebar_provider.dart';
 import 'package:advisorapp/route/route_generator.dart';
 import 'package:advisorapp/style/colors.dart';
-
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
+//import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:advisorapp/config/dev.dart'
+    if (dart.library.io) 'package:advisorapp/config/prod.dart';
+
+//final navigatorKey = GlobalKey<NavigatorState>();
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final GoogleSignIn googleSignIn = GoogleSignIn();
+  //final GoogleSignIn googleSignIn = GoogleSignIn();
 
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => MicrosoftAuthProvider()),
         ChangeNotifierProvider(create: (context) => PartnerProvider()),
-        ChangeNotifierProvider(
-            create: (context) => LoginProvider(googleSignIn)),
+        ChangeNotifierProvider(create: (context) => LoginProvider()),
         ChangeNotifierProvider(create: (context) => MasterProvider()),
         ChangeNotifierProvider(create: (context) => LaunchProvider()),
         ChangeNotifierProvider(create: (context) => EmployerProvider()),
@@ -40,7 +41,6 @@ void main() {
         ChangeNotifierProvider(create: (context) => EliteImageProvider()),
         ChangeNotifierProvider(create: (context) => IdeaProvider()),
         ChangeNotifierProvider(create: (context) => AdminProvider()),
-        ChangeNotifierProvider(create: (context) => MicrosoftAuthProvider()),
         ChangeNotifierProvider(create: (context) => PaymentMethodProvider()),
       ],
       child: const MyApp(),
@@ -62,17 +62,8 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
+    print('API Base URL: ${AppConfig.webApiserviceURL}');
     loadData();
-    final authProvider =
-        Provider.of<MicrosoftAuthProvider>(context, listen: false);
-    authProvider.config = Config(
-        tenant: 'common',
-        clientId: 'a5489f64-06e7-4dfa-920c-196436ea8c46',
-        scope: 'User.Read',
-        navigatorKey: navigatorKey,
-        redirectUri: 'http://localhost:5000/',
-        loader: const SizedBox());
   }
 
   Future<void> loadData() async {
@@ -114,10 +105,13 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final microsoftProv =
+        Provider.of<MicrosoftAuthProvider>(context, listen: false);
     if (_isLoading) {
-      return const MaterialApp(
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
+        navigatorKey: microsoftProv.navigatorKeyMicrosoftAuth,
+        home: const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),
           ),
@@ -128,7 +122,7 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: "/",
-      navigatorKey: navigatorKey,
+      navigatorKey: microsoftProv.navigatorKeyMicrosoftAuth,
       onGenerateRoute: RouteGenerator.generateRoute,
       title: 'Advisor App',
       theme: ThemeData(

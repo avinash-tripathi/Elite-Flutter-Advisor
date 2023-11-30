@@ -1,4 +1,5 @@
 import 'package:advisorapp/models/account.dart';
+import 'package:advisorapp/models/role.dart';
 
 /* class SubscriptionLicense {
   String paymentcode;
@@ -58,6 +59,7 @@ class SubscriptionLicense {
   String nextrechargedate;
   String licensestatus;
   String accountstatus;
+  Role? accountrole;
 
   SubscriptionLicense(
       {this.accountcode = '',
@@ -78,7 +80,8 @@ class SubscriptionLicense {
       joineddate: json['joineddate'],
       nextrechargedate: json['nextrechargedate'],
       licensestatus: json['licensestatus'],
-      accountstatus: (json['accountstatus'] == null) ? 'active' : 'inactive',
+      accountstatus:
+          (json['accountstatus'] == null) ? 'active' : json['accountstatus'],
     );
   }
 }

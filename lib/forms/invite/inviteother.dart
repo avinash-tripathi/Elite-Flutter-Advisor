@@ -24,6 +24,7 @@ class InviteOther extends StatelessWidget {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     SizeConfig().init(context);
     double screenWidth = SizeConfig.screenWidth / 4;
+    MasterProvider mPrv = Provider.of<MasterProvider>(context, listen: false);
     final addOtherProvider =
         Provider.of<AddotherProvider>(context, listen: false);
     final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
@@ -65,9 +66,7 @@ class InviteOther extends StatelessWidget {
                                 /*    final addOtherProvider =
                                     Provider.of<AddotherProvider>(context,
                                         listen: false); */
-                                MasterProvider mPrv =
-                                    Provider.of<MasterProvider>(context,
-                                        listen: false);
+
                                 Role objRole = mPrv.accountroles
                                     .firstWhere((e) => e.rolename == 'User');
                                 BaseCompanyCategory objBaseC =
@@ -305,10 +304,6 @@ class InviteOther extends StatelessWidget {
                                                                         AdvisorInvite
                                                                             currInv =
                                                                             prvaddOther.filteredinvites[index];
-                                                                        MasterProvider
-                                                                            mPrv =
-                                                                            Provider.of<MasterProvider>(context,
-                                                                                listen: false);
 
                                                                         Role objRole = mPrv.accountroles.firstWhere((e) =>
                                                                             e.rolename ==
@@ -317,8 +312,7 @@ class InviteOther extends StatelessWidget {
                                                                             objRole;
 
                                                                         if (currInv.isvalid &&
-                                                                            currInv
-                                                                                .invitedemail.isNotEmpty) {
+                                                                            currInv.invitedemail.isNotEmpty) {
                                                                           prvaddOther.setEmailStatus(
                                                                               index,
                                                                               true);
@@ -333,13 +327,14 @@ class InviteOther extends StatelessWidget {
                                                                                 prvaddOther.filteredinvites[index].invitationstatus = prvaddOther.currentInvite.invitationstatus,
                                                                                 prvaddOther.currentInvite.invitationstatus == 'invited' ? showSnackBar(context, 'Invitation Sent Successfully!') : showSnackBar(context, 'Invitation Failed!')
                                                                               });
-                                                                        } else if (currInv
+                                                                        }
+                                                                        /*  else if (currInv
                                                                             .invitedemail
                                                                             .isEmpty) {
                                                                           showCustomSnackBar(
                                                                               context,
                                                                               "Please enter a valid email id.");
-                                                                        }
+                                                                        } */
                                                                       }
                                                                     } catch (e) {
                                                                       prvaddOther.setEmailStatus(
@@ -404,7 +399,36 @@ class InviteOther extends StatelessWidget {
                                                                     ? ElevatedButton(
                                                                         onPressed:
                                                                             () async {
-                                                                          //Put the logic to reinvite
+                                                                          try {
+                                                                            if (formKey.currentState!.validate()) {
+                                                                              bool result = await EliteDialog(context, 'Are you sure to reinvite?', 'Please make sure that the invited person is an advisor.\nAdvsiors are also known as benefits consultants or brokers.', 'Ok', 'Cancel');
+                                                                              if (!result) {
+                                                                                return;
+                                                                              }
+                                                                              AdvisorInvite currInv = prvaddOther.filteredinvites[index];
+
+                                                                              Role objRole = mPrv.accountroles.firstWhere((e) => e.rolename == 'User');
+                                                                              currInv.role = objRole;
+
+                                                                              if (currInv.isvalid && currInv.invitedemail.isNotEmpty) {
+                                                                                prvaddOther.setEmailStatus(index, true);
+
+                                                                                currInv.duration = 7;
+                                                                                currInv.invitationtype = 'MailTemplateTypeInviteJoin';
+
+                                                                                await prvaddOther.sendEmail(currInv, index).then((value) => {
+                                                                                      prvaddOther.filteredinvites[index].invitationstatus = prvaddOther.currentInvite.invitationstatus,
+                                                                                      prvaddOther.currentInvite.invitationstatus == 'invited' ? showSnackBar(context, 'Invitation Sent Successfully!') : showSnackBar(context, 'Invitation Failed!')
+                                                                                    });
+                                                                              }
+                                                                            }
+                                                                          } catch (e) {
+                                                                            prvaddOther.setEmailStatus(index,
+                                                                                false);
+                                                                          } finally {
+                                                                            prvaddOther.setEmailStatus(index,
+                                                                                false);
+                                                                          }
                                                                         },
                                                                         style:
                                                                             buttonStyleBlue,

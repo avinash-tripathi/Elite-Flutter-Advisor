@@ -41,4 +41,14 @@ class Vote {
     }
     return totalVotes;
   }
+
+  int getTotalNegativeVotesForIdea(List<Vote> votes, String ideacode) {
+    int totalVotes = 0;
+    for (var vote in votes) {
+      if (vote.ideacode == ideacode && vote.voted == false) {
+        totalVotes++;
+      }
+    }
+    return totalVotes;
+  }
 }

@@ -5,6 +5,8 @@ import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
+import 'package:advisorapp/config/dev.dart'
+    if (dart.library.io) 'package:advisorapp/config/prod.dart';
 
 /* const String secretID = "b3134070-638c-42ec-b635-64ba32cdef92";
 const String secretValue = "yY78Q~w-IQWGf2tOcDiq5jcrcegOhj8Ueg6odcLK";
@@ -12,15 +14,26 @@ const String applicationclientID = "a5489f64-06e7-4dfa-920c-196436ea8c46";
 const String objectID = "af8ded8d-3bd7-4dc4-a04f-c4b2a8b7bfd2";
 const String directorytenantID = "a66011e6-800e-4e0c-9bed-4d1dd9ba7c9d"; */
 
-const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
-/* const String webApiserviceURL =
-    "https://advisordevelopment.azurewebsites.net/api/"; */
+//PROD CONIG
+/* const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
+const String microsoftClientId = '1087cdb1-0c33-4e7f-9c79-24d674d0165f';
+const String microsoftAuthredirectUri = 'https://advisor.alicorn.co/'; */
+
+//DEV CONIG
+const String webApiserviceURL = AppConfig.webApiserviceURL;
+//const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
+const String microsoftClientId = 'a5489f64-06e7-4dfa-920c-196436ea8c46';
+const String microsoftAuthredirectUri = 'http://localhost:5000/';
+
 const String basePathOfLogo =
     'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
 const String defaultimagePath =
     'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/default.png';
 const String defaultActionItemPath =
     'https://advisorformsftp.blob.core.windows.net/advisorform/';
+
+const String defaultIdeaPath =
+    'https://advisorformsftp.blob.core.windows.net/advisorideas/';
 
 // add these in a constant file preferably in constant/dimensions.dart
 //start of dimensions.dart file

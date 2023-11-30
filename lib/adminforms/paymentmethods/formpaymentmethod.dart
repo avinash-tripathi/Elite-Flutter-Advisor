@@ -1,5 +1,8 @@
 import 'dart:js_interop';
 
+import 'package:advisorapp/adminforms/paymentmethods/forminvoice.dart';
+import 'package:advisorapp/adminforms/paymentmethods/frmpdfpreview.dart';
+
 import 'package:advisorapp/component/background.dart';
 import 'package:advisorapp/component/sidemenu.dart';
 import 'package:advisorapp/config/size_config.dart';
@@ -24,6 +27,7 @@ class FormPaymentMethod extends StatelessWidget {
         Provider.of<PaymentMethodProvider>(context, listen: false); */
     final adminProvider = Provider.of<AdminProvider>(context, listen: false);
     final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
+    adminProvider.readInvoices(lgnProvider.logedinUser.accountcode);
 
     return Scaffold(
       key: scaffoldKey,
@@ -55,10 +59,18 @@ class FormPaymentMethod extends StatelessWidget {
                                     .attachedpaymentmethod?.paymentmethoddata !=
                                 null)
                             ? null
-                            : () {
+                            : () async {
                                 Uri uri =
                                     Uri.parse(adminProvider.setupintentUrl);
-                                launchUrl(uri);
+                                bool result = await EliteDialog(
+                                    context,
+                                    'Please Note',
+                                    'The advisor platform is an ALICORN Inc product.\nWe use Stripe for secure payment processing and you are being redirected to the payment gateway now.',
+                                    'OK',
+                                    'CANCEL');
+                                if (result) {
+                                  launchUrl(uri);
+                                }
                               },
                         child: Tooltip(
                           textStyle: const TextStyle(
@@ -87,173 +99,169 @@ class FormPaymentMethod extends StatelessWidget {
                   SizedBox(
                     width: SizeConfig.screenWidth,
                     height: SizeConfig.screenWidth / 2,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        /*  const Padding(
-                          padding: EdgeInsets.only(left: 8.0),
-                          child: Text(
-                            'Your credit and debit cards',
-                            style: TextStyle(
-                                color: AppColors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 10,
                           ),
-                        ), */
-                        Consumer<AdminProvider>(
-                            builder: (context, prvAdmin, child) {
-                          return (prvAdmin.readingPaymentMethod ||
-                                  prvAdmin.deletePaymentMethod)
-                              ? displaySpin()
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    (prvAdmin.attachedpaymentmethod
-                                                ?.paymentmethoddata !=
-                                            null)
-                                        ? DataTable(
-                                            columnSpacing: 8.0,
-                                            columns: [
-                                              DataColumn(
-                                                label: SizedBox(
-                                                  width:
-                                                      SizeConfig.screenWidth /
-                                                          6,
-                                                  child: const Center(
-                                                      child: Text('No')),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: SizedBox(
-                                                  width:
-                                                      SizeConfig.screenWidth /
-                                                          6,
-                                                  child: const Center(
-                                                    child: Text('Name on card'),
+                          Consumer<AdminProvider>(
+                              builder: (context, prvAdmin, child) {
+                            return (prvAdmin.readingPaymentMethod ||
+                                    prvAdmin.deletePaymentMethod)
+                                ? displaySpin()
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      (prvAdmin.attachedpaymentmethod
+                                                  ?.paymentmethoddata !=
+                                              null)
+                                          ? DataTable(
+                                              columnSpacing: 8.0,
+                                              columns: [
+                                                DataColumn(
+                                                  label: SizedBox(
+                                                    width:
+                                                        SizeConfig.screenWidth /
+                                                            6,
+                                                    child: const Center(
+                                                        child: Text('No')),
                                                   ),
                                                 ),
-                                              ),
-                                              DataColumn(
-                                                label: SizedBox(
-                                                  width:
-                                                      SizeConfig.screenWidth /
-                                                          8,
-                                                  child: const Center(
+                                                DataColumn(
+                                                  label: SizedBox(
+                                                    width:
+                                                        SizeConfig.screenWidth /
+                                                            6,
+                                                    child: const Center(
                                                       child:
-                                                          Text('Expires on')),
-                                                ),
-                                              ),
-                                              DataColumn(
-                                                label: SizedBox(
-                                                  width:
-                                                      SizeConfig.screenWidth /
-                                                          8,
-                                                  child: const Center(
-                                                      child: Text('')),
-                                                ),
-                                              ),
-                                            ],
-                                            rows: [
-                                              DataRow(cells: [
-                                                DataCell(Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Center(
-                                                      child: Image.asset(
-                                                          'assets/paymenticons/visa.png'),
+                                                          Text('Name on card'),
                                                     ),
-                                                    Center(
-                                                      child: Image.asset(
-                                                          'assets/paymenticons/mastercard.png'),
-                                                    ),
-                                                    Center(
-                                                      child: Text(
-                                                        '${prvAdmin.attachedpaymentmethod?.paymentmethoddata?.card.brand ?? ''}****${prvAdmin.attachedpaymentmethod?.paymentmethoddata?.card.last4 ?? ''}',
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: SizedBox(
+                                                    width:
+                                                        SizeConfig.screenWidth /
+                                                            8,
+                                                    child: const Center(
+                                                        child:
+                                                            Text('Expires on')),
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: SizedBox(
+                                                    width:
+                                                        SizeConfig.screenWidth /
+                                                            8,
+                                                    child: const Center(
+                                                        child: Text('')),
+                                                  ),
+                                                ),
+                                              ],
+                                              rows: [
+                                                DataRow(cells: [
+                                                  DataCell(Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Center(
+                                                        child: Image.asset(
+                                                            'assets/paymenticons/visa.png'),
                                                       ),
+                                                      Center(
+                                                        child: Image.asset(
+                                                            'assets/paymenticons/mastercard.png'),
+                                                      ),
+                                                      Center(
+                                                        child: Text(
+                                                          '${prvAdmin.attachedpaymentmethod?.paymentmethoddata?.card.brand ?? ''}****${prvAdmin.attachedpaymentmethod?.paymentmethoddata?.card.last4 ?? ''}',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )),
+                                                  DataCell(Center(
+                                                    child: Text(
+                                                      (prvAdmin
+                                                              .attachedpaymentmethod!
+                                                              .paymentmethoddata
+                                                              .isNull)
+                                                          ? ''
+                                                          : prvAdmin
+                                                              .attachedpaymentmethod!
+                                                              .paymentmethoddata!
+                                                              .billingDetails
+                                                              .name,
                                                     ),
-                                                  ],
-                                                )),
-                                                DataCell(Center(
-                                                  child: Text(
-                                                    (prvAdmin
-                                                            .attachedpaymentmethod!
-                                                            .paymentmethoddata
-                                                            .isNull)
-                                                        ? ''
-                                                        : prvAdmin
-                                                            .attachedpaymentmethod!
-                                                            .paymentmethoddata!
-                                                            .billingDetails
-                                                            .name,
-                                                  ),
-                                                )),
-                                                DataCell(Center(
-                                                  child: Text(
-                                                    prvAdmin.attachedpaymentmethod !=
-                                                            null
-                                                        ? '${prvAdmin.attachedpaymentmethod!.paymentmethoddata?.card.expMonth}/${prvAdmin.attachedpaymentmethod!.paymentmethoddata?.card.expYear}'
-                                                        : '',
-                                                  ),
-                                                )),
-                                                DataCell(
-                                                  Center(
-                                                    child: GestureDetector(
-                                                      onTap: () async {
-                                                        try {
-                                                          var result =
-                                                              await EliteDialog(
-                                                            context,
-                                                            'Please confirm!',
-                                                            'Are you sure to delete?',
-                                                            'Yes',
-                                                            'No',
-                                                          );
-                                                          if (result) {
-                                                            await prvAdmin
-                                                                .deleteAttachedPaymentMethod(
-                                                              lgnProvider
-                                                                  .logedinUser
-                                                                  .accountcode,
-                                                              adminProvider
-                                                                  .attachedpaymentmethod!
-                                                                  .paymentmethoddata
-                                                                  ?.id,
+                                                  )),
+                                                  DataCell(Center(
+                                                    child: Text(
+                                                      prvAdmin.attachedpaymentmethod !=
+                                                              null
+                                                          ? '${prvAdmin.attachedpaymentmethod!.paymentmethoddata?.card.expMonth}/${prvAdmin.attachedpaymentmethod!.paymentmethoddata?.card.expYear}'
+                                                          : '',
+                                                    ),
+                                                  )),
+                                                  DataCell(
+                                                    Center(
+                                                      child: GestureDetector(
+                                                        onTap: () async {
+                                                          try {
+                                                            var result =
+                                                                await EliteDialog(
+                                                              context,
+                                                              'Please confirm!',
+                                                              'Are you sure you want to delete this Payment Method?',
+                                                              'Yes',
+                                                              'No',
                                                             );
+                                                            if (result) {
+                                                              await prvAdmin
+                                                                  .deleteAttachedPaymentMethod(
+                                                                lgnProvider
+                                                                    .logedinUser
+                                                                    .accountcode,
+                                                                adminProvider
+                                                                    .attachedpaymentmethod!
+                                                                    .paymentmethoddata
+                                                                    ?.id,
+                                                              );
+                                                            }
+                                                          } catch (e) {
+                                                            print(e);
                                                           }
-                                                        } catch (e) {
-                                                          print(e);
-                                                        }
-                                                      },
-                                                      child: const Icon(
-                                                        Icons.delete,
-                                                        color: AppColors.red,
+                                                        },
+                                                        child: const Icon(
+                                                          Icons.delete,
+                                                          color: AppColors.red,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ]),
-                                            ],
-                                          )
-                                        : const Text(
-                                            'No payment method registered')
-                                  ],
-                                );
-                        }),
-                        /*   Consumer<PaymentMethodProvider>(
-                            builder: (context, prvMethod, child) {
-                          return prvMethod.selectedMethod == 'Card'
-                              ? const CardEntry()
-                              : const BankAccountEntry();
-                        }) */
-                      ],
+                                                ]),
+                                              ],
+                                            )
+                                          : const Text(
+                                              'No payment method registered')
+                                    ],
+                                  );
+                          }),
+                          const FormInvoice(),
+                          Consumer<AdminProvider>(
+                              builder: (context, prvPdf, child) {
+                            return prvPdf.clickedTodownload
+                                ? const FrmPdfPreview()
+                                : const Text('');
+                          })
+                        ],
+                      ),
                     ),
                   ),
                 ],

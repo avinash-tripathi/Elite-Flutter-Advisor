@@ -7,13 +7,13 @@ import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerassistant.dart';
 import 'package:advisorapp/models/employerprofile.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
+import 'package:advisorapp/models/mail/newactionitemmail.dart';
 import 'package:advisorapp/models/role.dart';
 import 'package:advisorapp/models/visibilitystatus.dart';
-import 'package:advisorapp/providers/master_provider.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/accountaction.dart';
 import '../models/launchstatus.dart';
 import 'dart:html' as html;
@@ -29,6 +29,14 @@ class EmployerProvider extends ChangeNotifier {
   TextEditingController contractsignatoryController = TextEditingController();
   TextEditingController daytodaycontactController = TextEditingController();
   TextEditingController planeffectivedateController = TextEditingController();
+
+  Future<void> sendAssignmentEmail(NewActionItemMail obj) async {
+    try {
+      await HttpService().sendEmailForNewActionItem(obj);
+      notifyListeners();
+    } catch (e) {
+    } finally {}
+  }
 
   Employer _currentEmployer = Employer(partners: []);
   Employer get currentEmployer => _currentEmployer;
@@ -288,7 +296,7 @@ class EmployerProvider extends ChangeNotifier {
 
   Future<void> clearActionLaunchPack() async {
     _actionlaunchpacks.clear();
-    // notifyListeners();
+    notifyListeners();
   }
 
   Future<void> clearEmployerAssist() async {
@@ -318,6 +326,7 @@ class EmployerProvider extends ChangeNotifier {
 
       employerAssistList = accounts
           .map((oJson) => EmployerAssist.fromJson(oJson.toJson()))
+          .toSet()
           .toList();
       notifyListeners();
     } catch (e) {
@@ -393,9 +402,21 @@ class EmployerProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateEmployer(Employer obj) async {
+  Future<void> updateEmployer(
+      Employer obj, Role? userRole, CompanyCategory? companycategory) async {
     try {
       updating = true;
+      if (obj.contractsignatoryemailinvitationstatus == "") {
+        AdvisorInvite objAdv1 = AdvisorInvite(
+            invitedemail: obj.contractsignatoryemail,
+            role: userRole!,
+            companycategory: companycategory!);
+        objAdv1.duration = 7;
+        objAdv1.invitationtype = 'MailTemplateTypeInviteJoin';
+        sendingEmail1 = true;
+        await sendEmail(objAdv1, 'CONTRACTSIGNATORY');
+        sendingEmail1 = false;
+      }
       Employer returnObject = await HttpService().updateEmployer(obj);
       returnObject.contractsignatoryemailinvitationstatus =
           obj.contractsignatoryemailinvitationstatus;
@@ -458,15 +479,20 @@ class EmployerProvider extends ChangeNotifier {
   }
 
   Future<void> addActionLaunchPack() async {
-    if (_actionlaunchpacks.isEmpty) {
-      _actionlaunchpacks.add(ActionLaunchPack(
-          filebase64: '',
-          fileextension: '',
-          filename: '',
-          formcode: '',
-          formname: '',
-          attachmenttype: 'file'));
-    }
+    _actionlaunchpacks.clear();
+    _actionlaunchpacks.add(ActionLaunchPack(
+        filebase64: '',
+        fileextension: '',
+        filename: '',
+        formcode: '',
+        formname: '',
+        attachmenttype: 'file',
+        esigndocumentdata:
+            ESignDocument(esigndocumentid: '', formdefinitionid: '')));
+
+    /* if (_actionlaunchpacks.isEmpty) {
+      
+    } */
 
     notifyListeners();
   }
@@ -505,13 +531,24 @@ class EmployerProvider extends ChangeNotifier {
   }
 
   // From and To data
-  EmployerAssist? _selectedFromAssist;
-  EmployerAssist? get selectedFromAssist => _selectedFromAssist;
   String _toDotooltip = '';
   String get toDotooltip => _toDotooltip;
 
   set toDotooltip(String val) {
     _toDotooltip = val;
+    notifyListeners();
+  }
+
+  EmployerAssist? _selectedFromAssist;
+  EmployerAssist? get selectedFromAssist => _selectedFromAssist;
+
+  setSelectedFromAssistToNull() {
+    _selectedFromAssist = null;
+    notifyListeners();
+  }
+
+  setSelectedToAssistToNull() {
+    _selectedToAssist = null;
     notifyListeners();
   }
 

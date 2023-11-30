@@ -13,6 +13,7 @@ import 'package:advisorapp/models/employerprofile.dart';
 import 'package:advisorapp/models/idea.dart';
 //import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/launchpack.dart';
+import 'package:advisorapp/models/mail/newactionitemmail.dart';
 import 'package:advisorapp/models/naics.dart';
 import 'package:advisorapp/models/payment.dart';
 import 'package:advisorapp/models/resetpassword.dart';
@@ -974,8 +975,6 @@ class HttpService {
 
       if (objResponse.statusCode == 200) {
         Account objectR = Account.fromJson(jsonDecode(objResponse.body)[0]);
-        //List<DataRow> dataRows = [];
-        //List data = json.decode(objResponse.body);
         return objectR;
       } else {
         throw Exception('Failed to fetch data');
@@ -1233,6 +1232,42 @@ class HttpService {
         return data;
       } else {
         throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<NewActionItemMail> sendEmailForNewActionItem(
+      NewActionItemMail obj) async {
+    try {
+      Uri uri = Uri.parse("${serviceURL}Advisor/SendEmail");
+      String? username = await getLoggedInUserName();
+      obj.fromUserName = username!;
+      obj.mailTemplateType = "MailTemplateTypeActionItemAssignment";
+      obj.toRecipientEmailId = obj.toRecipientEmailId;
+      var objResponse = await http.Client().post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Charset': 'utf-8',
+            "Access-Control-Allow-Origin":
+                "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials":
+                "true", // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+          },
+          body: json.encode(obj.toMap()));
+      if (objResponse.statusCode == 200) {
+        var data = json.decode(objResponse.body);
+        if (data[0]['response'] == true) {}
+        return obj;
+      } else {
+        return obj;
+        // if not sent correctly then obj.invitationstatus will be blank.
+        //We will check if obj.invitationstatus='invited' then will be consider as sent.
+        // throw Exception('Failed to fetch data');
       }
     } catch (e) {
       rethrow;

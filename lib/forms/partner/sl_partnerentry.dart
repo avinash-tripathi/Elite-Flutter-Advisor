@@ -56,6 +56,54 @@ class SLPartnerEntry extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          Padding(
+            padding: paddingConfig,
+            child: Consumer<PartnerProvider>(builder: (context, value, child) {
+              return SizedBox(
+                width: screenWidth,
+                child: InputDecorator(
+                  decoration: CustomDropDownDecoration.textDecoration(
+                      'Select Company Category',
+                      const Icon(
+                        Icons.business,
+                        color: AppColors.secondary,
+                      ),
+                      const Icon(
+                        Icons.business,
+                        color: Colors.transparent,
+                      )),
+                  child: DropdownButton<CompanyCategory>(
+                    key: UniqueKey(),
+                    value: (value.selectedPartnerCompanyCategory == null)
+                        ? objPartnerCategory
+                        : value.selectedPartnerCompanyCategory,
+                    onChanged: (CompanyCategory? newValue) {
+                      value.selectedPartnerCompanyCategory = newValue!;
+                      objPartnerCategory = newValue;
+                    },
+                    items: master.companycategories
+                        .map((CompanyCategory obj) {
+                          return DropdownMenuItem<CompanyCategory>(
+                            value: obj,
+                            enabled: (obj.categoryname != 'Employer' &&
+                                obj.categoryname != 'Advisor' &&
+                                obj.categoryname != 'Select'),
+                            child: Text(obj.categoryname,
+                                style: TextStyle(
+                                    color: (obj.categoryname == 'Employer' ||
+                                            obj.categoryname == 'Advisor' ||
+                                            obj.categorycode == 'select')
+                                        ? AppColors.iconGray
+                                        : AppColors.black)),
+                          );
+                        })
+                        .toSet()
+                        .toList(),
+                  ),
+                ),
+              );
+            }),
+          ),
           /* Padding(
             padding: paddingConfig,
             child: SizedBox(
@@ -524,54 +572,7 @@ class SLPartnerEntry extends StatelessWidget {
               ],
             ),
           ), */
-          Padding(
-            padding: paddingConfig,
-            child: Consumer<PartnerProvider>(builder: (context, value, child) {
-              return SizedBox(
-                width: screenWidth,
-                child: InputDecorator(
-                  decoration: CustomDropDownDecoration.textDecoration(
-                      'Select Company Category',
-                      const Icon(
-                        Icons.business,
-                        color: AppColors.secondary,
-                      ),
-                      const Icon(
-                        Icons.business,
-                        color: Colors.transparent,
-                      )),
-                  child: DropdownButton<CompanyCategory>(
-                    key: UniqueKey(),
-                    value: (value.selectedPartnerCompanyCategory == null)
-                        ? objPartnerCategory
-                        : value.selectedPartnerCompanyCategory,
-                    onChanged: (CompanyCategory? newValue) {
-                      value.selectedPartnerCompanyCategory = newValue!;
-                      objPartnerCategory = newValue;
-                    },
-                    items: master.companycategories
-                        .map((CompanyCategory obj) {
-                          return DropdownMenuItem<CompanyCategory>(
-                            value: obj,
-                            enabled: (obj.categoryname != 'Employer' &&
-                                obj.categoryname != 'Advisor' &&
-                                obj.categoryname != 'Select'),
-                            child: Text(obj.categoryname,
-                                style: TextStyle(
-                                    color: (obj.categoryname == 'Employer' ||
-                                            obj.categoryname == 'Advisor' ||
-                                            obj.categorycode == 'select')
-                                        ? AppColors.iconGray
-                                        : AppColors.black)),
-                          );
-                        })
-                        .toSet()
-                        .toList(),
-                  ),
-                ),
-              );
-            }),
-          ),
+
           Padding(
             padding: const EdgeInsets.only(top: 30),
             child: SizedBox(

@@ -1,3 +1,5 @@
+import 'package:advisorapp/models/esign/esigndocument.dart';
+
 class ActionLaunchPack {
   String launchcode;
   String formcode = '';
@@ -11,6 +13,8 @@ class ActionLaunchPack {
   String duedate = '';
   String itemstatus = '';
   String attachmenttype = '';
+  String contentmimetype = '';
+  ESignDocument esigndocumentdata;
 
   ActionLaunchPack(
       {this.launchcode = '',
@@ -24,8 +28,15 @@ class ActionLaunchPack {
       required this.filename,
       this.duedate = '',
       this.itemstatus = '',
-      this.attachmenttype = ''});
+      this.attachmenttype = '',
+      this.contentmimetype = '',
+      required this.esigndocumentdata});
   factory ActionLaunchPack.fromJson(Map<String, dynamic> json) {
+    List<dynamic> roleWithEmployerJson = json['esigndocumentdata'] ?? '';
+    List<ESignDocument> esigndocument = roleWithEmployerJson
+        .map((oJson) => ESignDocument.fromJson(oJson))
+        .toList();
+
     return ActionLaunchPack(
       launchcode: json['launchcode'] ?? '',
       formcode: json['formcode'] ?? '',
@@ -38,12 +49,13 @@ class ActionLaunchPack {
       filename: json['formfilename'] ?? '',
       duedate: (json['duedate'] == null) ? '1900-01-01' : json['duedate'],
       itemstatus: (json['itemstatus'] == null || json['itemstatus'] == '')
-          ? 'inactive'
+          ? 'active'
           : json['itemstatus'],
       attachmenttype:
           (json['attachmenttype'] == null || json['attachmenttype'] == '')
               ? 'file'
               : json['attachmenttype'],
+      esigndocumentdata: esigndocument[0],
     );
   }
 
@@ -59,6 +71,7 @@ class ActionLaunchPack {
     map['itemstatus'] = itemstatus;
     map['formfilename'] = filename;
     map['attachmenttype'] = attachmenttype;
+    map['contentmimetype'] = contentmimetype;
     return map;
   }
 }

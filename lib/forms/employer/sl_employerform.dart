@@ -2,9 +2,7 @@ import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/custom/custom_text_decoration.dart';
 import 'package:advisorapp/models/advisorinvitation.dart';
-import 'package:advisorapp/models/company.dart';
 import 'package:advisorapp/models/companycategory.dart';
-import 'package:advisorapp/models/companytype.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/partner.dart';
 import 'package:advisorapp/models/role.dart';
@@ -383,7 +381,7 @@ class SLEmployerForm extends StatelessWidget {
                       )
                     ],
                   )),
-              Padding(
+              /* Padding(
                 padding: paddingConfig,
                 child:
                     Consumer<MasterProvider>(builder: (context, value, child) {
@@ -426,7 +424,7 @@ class SLEmployerForm extends StatelessWidget {
                     ),
                   );
                 }),
-              ),
+              ), */
               Padding(
                 padding: paddingConfig,
                 child: Consumer<PartnerProvider>(
@@ -580,7 +578,7 @@ class SLEmployerForm extends StatelessWidget {
 
                                       return;
                                     }
-                                    if (prvMaster.selectedEmployerCompanyType!
+                                    /*  if (prvMaster.selectedEmployerCompanyType!
                                         .typecode.isEmpty) {
                                       EliteDialog(
                                           context,
@@ -589,7 +587,7 @@ class SLEmployerForm extends StatelessWidget {
                                           "Ok",
                                           "Close");
                                       return;
-                                    }
+                                    } */
 
                                     final prvPartner =
                                         Provider.of<PartnerProvider>(context,
@@ -615,17 +613,13 @@ class SLEmployerForm extends StatelessWidget {
                                         .decisionmakerController.text
                                         .split("@")[1];
 
-                                    obj.companytype = prvMaster
+                                    /*  obj.companytype = prvMaster
                                         .selectedEmployerCompanyType!.typecode;
-                                    /*  obj.companyname = companynameController.text;
-                                obj.companyaddress =
-                                    companyaddressController.text;
-                                    obj.companyphonenumber =
-                                    companyphoneController.text;
-                                     */
-                                    /*  obj.companyname = '';
-                                  obj.companyaddress = '';
-                                  obj.companyphonenumber = ''; */
+                                    */
+                                    obj.companytype = prvMaster.companytypes
+                                        .firstWhere(
+                                            (e) => e.typecode == 'select')
+                                        .typecode;
 
                                     obj.planeffectivedate =
                                         DateFormat('yyyy-MM-dd')
@@ -638,31 +632,11 @@ class SLEmployerForm extends StatelessWidget {
                                     obj.decisionmakeremail =
                                         prvEntry.decisionmakerController.text;
                                     obj.partners = selectedPartners;
+                                    Role userRole = master.accountroles
+                                        .firstWhere(
+                                            (e) => e.rolename == 'User');
 
                                     if (prvSave.addNew) {
-                                      Role userRole = master.accountroles
-                                          .firstWhere(
-                                              (e) => e.rolename == 'User');
-                                      /* await inviteEmail(
-                                            objInviteWithCategory,
-                                            master,
-                                            prvSave,
-                                            'DECISIONMAKER',
-                                            prvEntry
-                                                .decisionmakerController.text)
-                                        .then((value) => showSnackBar(context,
-                                            "Invitation Sent Successfully!."));
-
-                                    await inviteEmail(
-                                            objInviteWithCategory,
-                                            master,
-                                            prvSave,
-                                            'CONTRACTSIGNATORY',
-                                            prvEntry.contractsignatoryController
-                                                .text)
-                                        .then((value) => showSnackBar(context,
-                                            "Invitation Sent Successfully!.")); */
-
                                       await prvSave
                                           .addEmployer(obj, userRole,
                                               objInviteWithCategory)
@@ -674,8 +648,10 @@ class SLEmployerForm extends StatelessWidget {
                                     if (prvSave.edit) {
                                       obj.employercode = prvSave
                                           .selectedEmployer!.employercode;
-                                      await prvSave.updateEmployer(obj).then(
-                                          (value) => {
+                                      await prvSave
+                                          .updateEmployer(obj, userRole,
+                                              objInviteWithCategory)
+                                          .then((value) => {
                                                 showSnackBar(context,
                                                     "Employer Updated!.")
                                               });

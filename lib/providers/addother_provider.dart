@@ -50,7 +50,16 @@ class AddotherProvider extends ChangeNotifier {
   }
  */
 
+  bool _invitingNew = false;
+  bool get invitingNew => _invitingNew;
+
+  set invitingNew(bool obj) {
+    _invitingNew = obj;
+    notifyListeners();
+  }
+
   void addEmail() {
+    _invitingNew = true;
     _advisorinvites.add(AdvisorInvite(
         role: Role(rolecode: '', rolename: '', roletype: ''),
         companycategory: CompanyCategory(
@@ -120,6 +129,7 @@ class AddotherProvider extends ChangeNotifier {
           .sendEmail(obj)
           .then((value) => _currentInvite = value);
       _sendingEmail[index] = false;
+      _invitingNew = false;
       notifyListeners();
     } catch (e) {
       _sendingEmail[index] = false;

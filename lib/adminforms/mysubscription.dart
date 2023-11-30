@@ -5,9 +5,11 @@ import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/custom/custom_profileviewer.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
+import 'package:advisorapp/models/role.dart';
 import 'package:advisorapp/models/status.dart';
 import 'package:advisorapp/providers/admin_provider.dart';
 import 'package:advisorapp/providers/login_provider.dart';
+import 'package:advisorapp/providers/master_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,7 @@ class MySubscription extends StatelessWidget {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     SizeConfig().init(context);
     // double screenWidth = SizeConfig.screenWidth / 4;
+    final prvMaster = Provider.of<MasterProvider>(context, listen: false);
     final adminProvider = Provider.of<AdminProvider>(context, listen: false);
     final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
     adminProvider.readSubscriptionLicense(lgnProvider.logedinUser.accountcode);
@@ -152,8 +155,16 @@ class MySubscription extends StatelessWidget {
                                                     label: SizedBox(
                                                   width:
                                                       SizeConfig.screenWidth /
-                                                          10,
+                                                          12,
                                                   child: const Text('User'),
+                                                )),
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          8,
+                                                  child: const Text(
+                                                      'Account Role'),
                                                 )),
                                                 DataColumn(
                                                     label: SizedBox(
@@ -220,6 +231,63 @@ class MySubscription extends StatelessWidget {
                                                             ],
                                                           ),
                                                         ),
+                                                        DataCell(DropdownButton<
+                                                            Role>(
+                                                          value: (prvAdmin
+                                                                      .subscriptionLicenses[
+                                                                          i]
+                                                                      .accountrole ==
+                                                                  null)
+                                                              ? prvMaster
+                                                                  .accountroles
+                                                                  .firstWhere((element) =>
+                                                                      element
+                                                                          .rolecode ==
+                                                                      prvAdmin
+                                                                          .subscriptionLicenses[
+                                                                              i]
+                                                                          .accountdata
+                                                                          .accountrole)
+                                                              : prvAdmin
+                                                                  .subscriptionLicenses[
+                                                                      i]
+                                                                  .accountrole,
+                                                          onChanged: (Role?
+                                                              newValue) async {
+                                                            bool result =
+                                                                await EliteDialog(
+                                                                    context,
+                                                                    'Please confirm',
+                                                                    'Are you sure to update Account role of user?',
+                                                                    'Yes',
+                                                                    'No');
+                                                            if (result) {
+                                                              prvAdmin
+                                                                  .setAccountRole(
+                                                                      i,
+                                                                      newValue!);
+                                                              prvAdmin.updateRole(
+                                                                  prvAdmin
+                                                                      .subscriptionLicenses[
+                                                                          i]
+                                                                      .accountcode,
+                                                                  newValue
+                                                                      .rolecode);
+                                                            }
+                                                          },
+                                                          items: prvMaster
+                                                              .accountroles
+                                                              .map((Role obj) {
+                                                                return DropdownMenuItem<
+                                                                    Role>(
+                                                                  value: obj,
+                                                                  child: Text(obj
+                                                                      .rolename),
+                                                                );
+                                                              })
+                                                              .toSet()
+                                                              .toList(),
+                                                        )),
                                                         const DataCell(
                                                           Text(
                                                             "\$99 per month",
@@ -271,15 +339,24 @@ class MySubscription extends StatelessWidget {
                                                                   'Please confirm',
                                                                   (newValue!.code ==
                                                                           'inactive')
-                                                                      ? 'If user is marked as inactive,he will no longer access Advisor Portal.\n Please confirm?'
-                                                                      : 'If user is marked as Active,he will access Advisor Portal.\nAccount owner is responsible for the payment of fees on this account.\n Please confirm?',
+                                                                      ? 'Would you like to terminate this user?.'
+                                                                      : 'If a user is marked as Active, that user will have complete access to the advior platform.\nAll Active users will incur fees for billing purposes. Please confirm.?',
                                                                   'Yes',
                                                                   'No');
 
                                                               if (result) {
-                                                                prvAdmin.setStatus(
-                                                                    i,
-                                                                    newValue!);
+                                                                prvAdmin
+                                                                    .setStatus(
+                                                                        i,
+                                                                        newValue);
+
+                                                                prvAdmin.updateStatus(
+                                                                    prvAdmin
+                                                                        .subscriptionLicenses[
+                                                                            i]
+                                                                        .accountcode,
+                                                                    newValue
+                                                                        .code);
                                                               }
                                                               // add your code to handle the value change here
                                                             },

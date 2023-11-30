@@ -55,7 +55,12 @@ class Ideas extends StatelessWidget {
                     const SizedBox(height: 20),
                     Consumer<IdeaProvider>(builder: (context, prvMode, child) {
                       return prvMode.addNewIdea
-                          ? NewIdea(idea: Idea(), isReadOnly: false)
+                          ? NewIdea(
+                              idea: Idea(
+                                  filebase64: '',
+                                  fileextension: '',
+                                  ideafilename: ''),
+                              isReadOnly: false)
                           : const Text('');
                     }),
                     SizedBox(

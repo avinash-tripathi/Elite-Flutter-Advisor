@@ -30,15 +30,6 @@ class YourProfileForm extends StatelessWidget {
     final loginProvider = Provider.of<LoginProvider>(context, listen: false);
     final prvMaster = Provider.of<MasterProvider>(context, listen: false);
 
-    /* List<Role> selectedRoles = [];
-    for (var e in prvMaster.employerroles) {
-      for (var c in loginProvider.logedinUser.rolewithemployer) {
-        if (c.rolecode == e.rolecode) {
-          selectedRoles.add(e);
-        }
-      }
-    } */
-
     Role? objAccRole;
     List<CompanyCategory> companycategories = [];
     String? roleforaccount = '';
@@ -82,6 +73,11 @@ class YourProfileForm extends StatelessWidget {
         loginProvider.cachedAccount!.phonenumber.isEmpty
             ? loginProvider.logedinUser.phonenumber
             : loginProvider.cachedAccount!.phonenumber;
+    loginProvider.mobileController.text =
+        loginProvider.cachedAccount!.mobilenumber.isEmpty
+            ? loginProvider.logedinUser.mobilenumber
+            : loginProvider.cachedAccount!.mobilenumber;
+
     loginProvider.workemailController.text =
         loginProvider.cachedAccount!.workemail.isEmpty
             ? loginProvider.logedinUser.workemail
@@ -183,6 +179,30 @@ class YourProfileForm extends StatelessWidget {
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Please Enter Phone Number';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ),
+          Padding(
+            padding: paddingConfig,
+            child: SizedBox(
+              width: screenWidth,
+              child: TextFormField(
+                // initialValue: loginProvider.logedinUser?.companyaddress,
+                controller: loginProvider.mobileController,
+                keyboardType: TextInputType.number,
+                decoration: CustomTextDecoration.textDecoration(
+                  'Mobile Number',
+                  const Icon(
+                    Icons.phone,
+                    color: AppColors.secondary,
+                  ),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please Enter Mobile Number';
                   }
                   return null;
                 },
@@ -494,6 +514,8 @@ class YourProfileForm extends StatelessWidget {
                                     obj.rolewithemployer = selectedRoles;
                                     obj.phonenumber =
                                         lgnSave.phoneController.text;
+                                    obj.mobilenumber =
+                                        lgnSave.mobileController.text;
                                     obj.workemail =
                                         lgnSave.workemailController.text;
                                     obj.accountrole =
@@ -553,6 +575,8 @@ class YourProfileForm extends StatelessWidget {
                             obj.rolewithemployer = selectedRoles;
                             obj.phonenumber =
                                 loginProvider.phoneController.text;
+                            obj.mobilenumber =
+                                loginProvider.mobileController.text;
                             obj.workemail =
                                 loginProvider.workemailController.text;
                             obj.accountrole =
@@ -560,7 +584,6 @@ class YourProfileForm extends StatelessWidget {
                                     ? objAccRole!.rolecode
                                     : prvMaster.selectedAccountRole!.rolecode;
 
-                            //obj = setYourInfo(loginProvider.cachedAccount!);
                             obj.accountcode =
                                 loginProvider.logedinUser.accountcode;
 

@@ -17,16 +17,6 @@ class YourProfile extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-/*   final List<Role> objEmpRoles = [];
-  final Role? objAccRole;
-
-  final Account currentAccount = Account(rolewithemployer: []);
- final  List<CompanyCategory> companycategories = [];
- final  List<CompanyType> companytypes = [];
- final CompanyType? selectedCompanyType;
- final CompanyCategory? selectedCompanyCategory;
- final String? _rolewithemployer = '', _roleforaccount = '';
-final  CompanyCategory? companyCate; */
 
   @override
   Widget build(BuildContext context) {

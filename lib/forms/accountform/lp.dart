@@ -125,7 +125,7 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                           )),
                                           const DataColumn(
                                               label: SizedBox(
-                                            width: 95.0,
+                                            width: 100.0,
                                             child: Center(
                                                 child: Text('Renewal Pack')),
                                           )),
@@ -225,7 +225,7 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                 style: TextStyle(
                                                                     color: (status.code == 'file')
                                                                         ? Colors.blue
-                                                                        : (status.code == 'docsign')
+                                                                        : (status.code == 'esign')
                                                                             ? Colors.green
                                                                             : (status.code == 'inactive')
                                                                                 ? Colors.red
@@ -275,9 +275,41 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                     message: launchProvider
                                                         .launchpacks[index]
                                                         .filename,
-                                                    child: Text(launchProvider
-                                                        .launchpacks[index]
-                                                        .fileextension),
+                                                    child: GestureDetector(
+                                                      child: Text(launchProvider
+                                                          .launchpacks[index]
+                                                          .fileextension),
+                                                      onTap: () async {
+                                                        var docId = launchProvider
+                                                            .launchpacks[index]
+                                                            .esigndocumentdata
+                                                            .esigndocumentid;
+                                                        var formdefinitionId =
+                                                            launchProvider
+                                                                .launchpacks[
+                                                                    index]
+                                                                .esigndocumentdata
+                                                                .formdefinitionid;
+
+                                                        var jsonData =
+                                                            await launchProvider
+                                                                .generateESignEmbeddedURL(
+                                                                    docId,
+                                                                    formdefinitionId);
+                                                        Map<String, dynamic>
+                                                            dataMap = Map<
+                                                                    String,
+                                                                    dynamic>.from(
+                                                                jsonData);
+                                                        if (dataMap['url']
+                                                            .toString()
+                                                            .isNotEmpty) {
+                                                          Uri uri = Uri.parse(
+                                                              dataMap['url']);
+                                                          await launchUrl(uri);
+                                                        }
+                                                      },
+                                                    ),
                                                   ),
                                                   trailing: IconButton(
                                                       onPressed: (() async {
@@ -412,9 +444,14 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                   }).toList(),
                                                 ),
                                               )),
-                                              DataCell(Center(
-                                                child:
-                                                    (launchProvider
+                                              DataCell(Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Center(
+                                                    child: (launchProvider
                                                             .accountActionSaved(
                                                                 index))
                                                         ? displaySpin()
@@ -515,6 +552,17 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                       .blue,
                                                             ),
                                                           ),
+                                                  ),
+                                                  Center(
+                                                    child: IconButton(
+                                                      iconSize: 20,
+                                                      onPressed: () {},
+                                                      style: buttonStyleAmber,
+                                                      icon: Image.asset(
+                                                          'assets/ontask.png'),
+                                                    ),
+                                                  )
+                                                ],
                                               )),
                                             ],
                                           ),

@@ -84,7 +84,7 @@ class LoginScreenTopImage extends StatelessWidget {
               SizedBox(
                 width: 120,
                 height: 120,
-                child: SvgPicture.asset('assets/AlicornLogoTransparent.svg'),
+                child: SvgPicture.asset('assets/AdvisorLogo_Transparent.svg'),
               ),
               const Text(
                 "advisor$trademark",

@@ -8,6 +8,7 @@ import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerassistant.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/providers/login_provider.dart';
@@ -676,25 +677,35 @@ class MyRoom extends StatelessWidget {
                                                     [];
                                                 ActionLaunchPack obj =
                                                     ActionLaunchPack(
-                                                  attachmenttype: prvNew
-                                                      .actionlaunchpacks[i]
-                                                      .attachmenttype,
-                                                  filebase64: prvNew
-                                                      .actionlaunchpacks[i]
-                                                      .filebase64,
-                                                  fileextension: prvNew
-                                                      .actionlaunchpacks[i]
-                                                      .fileextension,
-                                                  formcode: '',
-                                                  formname: prvNew
-                                                      .actionlaunchpacks[i]
-                                                      .formname,
-                                                  launchpack: false,
-                                                  renewalpack: false,
-                                                  filename: prvNew
-                                                      .actionlaunchpacks[i]
-                                                      .filename,
-                                                );
+                                                        attachmenttype: prvNew
+                                                            .actionlaunchpacks[
+                                                                i]
+                                                            .attachmenttype,
+                                                        filebase64: prvNew
+                                                            .actionlaunchpacks[
+                                                                i]
+                                                            .filebase64,
+                                                        fileextension: prvNew
+                                                            .actionlaunchpacks[
+                                                                i]
+                                                            .fileextension,
+                                                        formcode: '',
+                                                        formname: prvNew
+                                                            .actionlaunchpacks[
+                                                                i]
+                                                            .formname,
+                                                        launchpack: false,
+                                                        renewalpack: false,
+                                                        filename: prvNew
+                                                            .actionlaunchpacks[
+                                                                i]
+                                                            .filename,
+                                                        esigndocumentdata:
+                                                            ESignDocument(
+                                                                esigndocumentid:
+                                                                    '',
+                                                                formdefinitionid:
+                                                                    ''));
                                                 lists.add(obj);
                                                 Employer selectedEmployer =
                                                     Employer(partners: []);

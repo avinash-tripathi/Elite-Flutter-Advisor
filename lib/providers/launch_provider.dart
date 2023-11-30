@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:advisorapp/models/accountaction.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchstatus.dart';
-
+import 'package:advisorapp/service/esignservice.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
 import 'dart:html' as html;
@@ -12,6 +12,7 @@ import 'dart:html' as html;
 class LaunchProvider extends ChangeNotifier {
   // ignore: prefer_final_fields
   //'CC-20230224174603740': 'TPA'
+
   bool reading = false;
   // bool isSavingData = false;
   List<ActionLaunchPack> _launchpacks = [];
@@ -84,17 +85,47 @@ class LaunchProvider extends ChangeNotifier {
     if (input.files!.isNotEmpty) {
       final file = input.files?.first;
       final reader = html.FileReader();
+
       reader.readAsArrayBuffer(file!);
       await reader.onLoad.first;
+
       final encoded = base64Encode(reader.result as List<int>);
       final fileext = ".${file.name.toString().split('.')[1]}";
+      //print(file.type);
       /*  MyFile objMyFile =
           MyFile(name: file.name, base64: encoded, fileextension: fileext); */
       _launchpacks[index].filename = file.name;
       _launchpacks[index].fileextension = fileext;
       _launchpacks[index].filebase64 = encoded;
+      _launchpacks[index].contentmimetype = file.type;
+
       notifyListeners();
     }
+  }
+
+  dynamic _esigndocument;
+  dynamic get esigndocument => _esigndocument;
+  set esigndocument(dynamic obj) {
+    _esigndocument = obj;
+    notifyListeners();
+  }
+
+  Future<dynamic> downloadEsignDocument(documentid) async {
+    _esigndocument = await EsignService().downloadEsignDocument(documentid);
+    notifyListeners();
+  }
+
+  dynamic _esignembededdata;
+  dynamic get esignembededdata => _esignembededdata;
+  set esignembededdata(dynamic obj) {
+    _esignembededdata = obj;
+    notifyListeners();
+  }
+
+  Future<dynamic> generateESignEmbeddedURL(documentid, formdefinitionid) async {
+    return await EsignService()
+        .generateESignEmbeddedURL(documentid, formdefinitionid);
+    //notifyListeners();
   }
 
   Future<void> addLaunchPack() async {
@@ -105,7 +136,9 @@ class LaunchProvider extends ChangeNotifier {
         formcode: '',
         formname: '',
         itemstatus: 'active',
-        attachmenttype: 'file'));
+        attachmenttype: 'file',
+        esigndocumentdata:
+            ESignDocument(esigndocumentid: '', formdefinitionid: '')));
 
     notifyListeners();
   }
@@ -153,14 +186,6 @@ class LaunchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /*  Future<void> getLaunchPack(accountcode) async {
-    _launchpacks.clear();
-    /*  await HttpService()
-        .fetchPartners(accountcode)
-        .then((value) => {_launchpacks = value}); */
-    notifyListeners();
-  } */
-
   Future<void> readLaunchPack(accountcode, employercode) async {
     _launchpacks.clear();
     try {
@@ -194,7 +219,7 @@ class LaunchProvider extends ChangeNotifier {
   Future<void> getAttachmentTypeList() async {
     attachmentTypeList.clear();
     attachmentTypeList.add(AttachmentType(code: 'file', name: 'File'));
-    attachmentTypeList.add(AttachmentType(code: 'docsign', name: 'DocSign'));
+    attachmentTypeList.add(AttachmentType(code: 'esign', name: 'eSign'));
 
     //notifyListeners();
   }

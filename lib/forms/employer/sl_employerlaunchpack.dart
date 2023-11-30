@@ -13,8 +13,10 @@ import 'package:advisorapp/models/accountaction.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/employerassistant.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
+import 'package:advisorapp/models/mail/newactionitemmail.dart';
 import 'package:advisorapp/providers/employer_provider.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/style/colors.dart';
@@ -36,7 +38,7 @@ class SLEmployerLaunchPack extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     final prvEmployer = Provider.of<EmployerProvider>(context, listen: false);
-    prvEmployer.clearActionLaunchPack();
+
     return Background(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,36 +59,34 @@ class SLEmployerLaunchPack extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextButton(
-                            onPressed: () {
-                              //resetForm();
-                              //dialogBuilder(context);
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                    onPressed: () {
-                                      prvEmployer.addActionLaunchPack();
-                                    },
-                                    child: const Text(
-                                      '+ Add a new to do',
-                                      style: appstyle,
-                                    )),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    /*  Navigator.of(context)
-                                        .popAndPushNamed("/Employer"); */
-                                  },
-                                  child: const Icon(
-                                    Icons.keyboard_return,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            )),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            TextButton(
+                                onPressed: () {
+                                  prvEmployer.setSelectedFromAssistToNull();
+                                  prvEmployer.setSelectedToAssistToNull();
+
+                                  prvEmployer.addActionLaunchPack();
+                                },
+                                child: const Text(
+                                  '+ Add a new to do',
+                                  style: appstyle,
+                                )),
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                /*  Navigator.of(context)
+                                    .popAndPushNamed("/Employer"); */
+                              },
+                              child: const Icon(
+                                Icons.keyboard_return,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
                         const Divider(color: Colors.grey),
                         Padding(
                           padding: const EdgeInsets.only(top: 20),
@@ -498,21 +498,19 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                   .employerAssistList
                                                                   .map((EmployerAssist
                                                                       value) {
-                                                                    return DropdownMenuItem<
-                                                                        EmployerAssist>(
-                                                                      value:
-                                                                          value,
-                                                                      child: Text(
-                                                                          value
-                                                                              .account
-                                                                              .accountname
-                                                                              .trim(),
-                                                                          style:
-                                                                              const TextStyle(fontSize: 12)),
-                                                                    );
-                                                                  })
-                                                                  .toSet()
-                                                                  .toList(),
+                                                                return DropdownMenuItem<
+                                                                    EmployerAssist>(
+                                                                  value: value,
+                                                                  child: Text(
+                                                                      value
+                                                                          .account
+                                                                          .accountname
+                                                                          .trim(),
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              12)),
+                                                                );
+                                                              }).toList(),
                                                               onChanged:
                                                                   (EmployerAssist?
                                                                       value) {
@@ -531,19 +529,20 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                     .employerAssistList
                                                                     .map((EmployerAssist
                                                                         value) {
-                                                                      return DropdownMenuItem<
-                                                                          EmployerAssist>(
-                                                                        value:
-                                                                            value,
-                                                                        child: Text(
-                                                                            value.account.accountname
-                                                                                .trim(),
-                                                                            style:
-                                                                                const TextStyle(fontSize: 12)),
-                                                                      );
-                                                                    })
-                                                                    .toSet()
-                                                                    .toList(),
+                                                                  return DropdownMenuItem<
+                                                                      EmployerAssist>(
+                                                                    value:
+                                                                        value,
+                                                                    child: Text(
+                                                                        value
+                                                                            .account
+                                                                            .accountname
+                                                                            .trim(),
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                12)),
+                                                                  );
+                                                                }).toList(),
                                                                 onChanged:
                                                                     (EmployerAssist?
                                                                         value) {
@@ -798,15 +797,13 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                             launchpack: false,
                                                                             renewalpack: false,
                                                                             filename: prvNew.actionlaunchpacks[i].filename,
-                                                                            attachmenttype: prvNew.actionlaunchpacks[i].attachmenttype);
+                                                                            attachmenttype: prvNew.actionlaunchpacks[i].attachmenttype,
+                                                                            esigndocumentdata: ESignDocument(esigndocumentid: '', formdefinitionid: ''));
                                                                         lists.add(
                                                                             obj);
 
                                                                         AccountAction objAct = AccountAction(
                                                                             accountcode:
-                                                                                /*  prvEmployer
-                                                                            .selectedToAssist!
-                                                                            .code */
                                                                                 selectedEmployer.accountcode,
                                                                             employercode: selectedEmployer.employercode,
                                                                             formfileupload: lists);
@@ -849,11 +846,20 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                               : 'public';
                                                                           obj.attachmenttype =
                                                                               objNewAdded.attachmenttype;
+                                                                          var objMail =
+                                                                              NewActionItemMail();
+                                                                          objMail.toRecipientEmailId = prvNew
+                                                                              .selectedToAssist!
+                                                                              .account
+                                                                              .workemail;
+                                                                          objMail.employerCompanyName =
+                                                                              selectedEmployer.companyname;
 
                                                                           prvNew
                                                                               .insertLaunchPackForEmployer(obj)
                                                                               .then((value) {
                                                                             //remove actionitem from list and clear the array.
+                                                                            prvNew.sendAssignmentEmail(objMail);
                                                                             prvNew.clearActionLaunchPack();
                                                                             prvNew.getInitialLaunchPack(
                                                                                 selectedEmployer.accountcode,

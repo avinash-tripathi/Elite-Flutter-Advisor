@@ -9,6 +9,7 @@ class Account {
   String worktitle;
   List<Role> rolewithemployer;
   String phonenumber;
+  String mobilenumber;
   String workemail;
   String accountrole;
   String eincode;
@@ -24,29 +25,33 @@ class Account {
   String mandatorycolumnfilled;
   String invitationstatus;
   bool validlicense;
+  String fancyname;
 
-  Account(
-      {this.accountcode = '0',
-      this.accountname = '',
-      this.lastname = '',
-      this.worktitle = '',
-      required this.rolewithemployer,
-      this.phonenumber = '',
-      this.workemail = '',
-      this.accountrole = '',
-      this.eincode = '',
-      this.naicscode = '',
-      this.companyname = '',
-      this.companydomainname = '',
-      this.typeofcompany = '',
-      this.companycategory = '',
-      this.companyaddress = '',
-      this.companyphonenumber = '',
-      this.accountpaymentinfo = '',
-      this.isfirstlogin = true,
-      this.mandatorycolumnfilled = '',
-      this.invitationstatus = '',
-      this.validlicense = false});
+  Account({
+    this.accountcode = '0',
+    this.accountname = '',
+    this.lastname = '',
+    this.worktitle = '',
+    required this.rolewithemployer,
+    this.phonenumber = '',
+    this.mobilenumber = '',
+    this.workemail = '',
+    this.accountrole = '',
+    this.eincode = '',
+    this.naicscode = '',
+    this.companyname = '',
+    this.companydomainname = '',
+    this.typeofcompany = '',
+    this.companycategory = '',
+    this.companyaddress = '',
+    this.companyphonenumber = '',
+    this.accountpaymentinfo = '',
+    this.isfirstlogin = true,
+    this.mandatorycolumnfilled = '',
+    this.invitationstatus = '',
+    this.validlicense = false,
+    this.fancyname = '',
+  });
 
   factory Account.fromJson(Map<String, dynamic> json) {
     List<dynamic> roleWithEmployerJson = json['rolewithemployer'] ?? '';
@@ -60,6 +65,7 @@ class Account {
       worktitle: json['worktitle'],
       rolewithemployer: roles,
       phonenumber: json['phonenumber'],
+      mobilenumber: json['mobilenumber'] ?? '',
       workemail: json['workemail'],
       accountrole: json['accountrole'],
       eincode: json['eincode'] ?? '',
@@ -79,6 +85,7 @@ class Account {
       validlicense: (json['validlicense'].toString().toUpperCase() == "TRUE")
           ? true
           : false,
+      fancyname: json['fancyname'] ?? '',
     );
   }
   Map toMap() {
@@ -90,7 +97,7 @@ class Account {
     map['rolewithemployer'] =
         rolewithemployer.map((objRole) => objRole.toMap()).toList();
 
-    /*  map['rolewithemployer'] = rolewithemployer; */
+    map['mobilenumber'] = mobilenumber;
     map['phonenumber'] = phonenumber;
     map['workemail'] = workemail;
     map['accountrole'] = accountrole;
@@ -116,6 +123,7 @@ class Account {
       'rolewithemployer':
           rolewithemployer.map((objRole) => objRole.toMap()).toList(),
       'phonenumber': phonenumber,
+      'mobilenumber': mobilenumber,
       'workemail': workemail,
       'accountrole': accountrole,
       'eincode': eincode,

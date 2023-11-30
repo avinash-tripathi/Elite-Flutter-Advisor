@@ -1,20 +1,18 @@
 // ignore: file_names
 
+import 'package:aad_oauth/aad_oauth.dart';
 import 'package:aad_oauth/model/config.dart';
 import 'package:aad_oauth/model/failure.dart';
 import 'package:aad_oauth/model/token.dart';
+import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/models/auth.dart';
 import 'package:advisorapp/service/authservice.dart';
 import 'package:flutter/material.dart';
 
 class MicrosoftAuthProvider extends ChangeNotifier {
-  Config? _config;
-  Config? get config => _config;
-  set config(Config? obj) {
-    _config = obj;
-    notifyListeners();
-  }
-
+  final GlobalKey<NavigatorState> navigatorKeyMicrosoftAuth =
+      GlobalKey<NavigatorState>();
+  late AadOAuth oauth;
   Failure? _failure;
   Failure? get failure => _failure;
   set setMicrosoftFailure(Failure obj) {
@@ -30,6 +28,14 @@ class MicrosoftAuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  AadOAuth? _aadOAuth;
+  AadOAuth? get aadOAuth => _aadOAuth;
+
+  set setaadOAuth(AadOAuth obj) {
+    _aadOAuth = obj;
+    notifyListeners();
+  }
+
   String? _accessToken;
   String? get accessToken => _accessToken;
 
@@ -38,16 +44,24 @@ class MicrosoftAuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /* Future<void> microsoftLogin() async {
+  Future<void> microsoftLogout() async {
+    await oauth.logout();
+  }
+
+  Future<void> microsoftLogin() async {
     try {
-      final navigatorKey = GlobalKey<NavigatorState>();
-      final AadOAuth oauth = AadOAuth(Config(
+      final Config config = Config(
           tenant: 'common',
-          clientId: 'a5489f64-06e7-4dfa-920c-196436ea8c46',
+          clientId: microsoftClientId,
           scope: 'User.Read',
-          navigatorKey: navigatorKey,
-          redirectUri: 'http://localhost:5000/',
-          loader: const SizedBox()));
+          navigatorKey: navigatorKeyMicrosoftAuth,
+          webUseRedirect: false,
+          redirectUri: microsoftAuthredirectUri,
+          loader: const SizedBox() //optional
+          );
+
+      oauth = AadOAuth(config);
+
       final result = await oauth.login();
       result.fold(
         (l) => setMicrosoftFailure = l,
@@ -56,14 +70,13 @@ class MicrosoftAuthProvider extends ChangeNotifier {
       var accessToken = await oauth.getAccessToken();
       if (accessToken != null) {
         _accessToken = accessToken;
-        getAuthenticatedUserData();
       }
 
       notifyListeners();
     } catch (e) {
       rethrow;
     }
-  } */
+  }
 
   Auth? _authUser;
   Auth? get authUser => _authUser;

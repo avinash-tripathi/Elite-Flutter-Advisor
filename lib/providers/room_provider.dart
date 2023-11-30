@@ -5,6 +5,7 @@ import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerassistant.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/models/visibilitystatus.dart';
@@ -266,7 +267,9 @@ class RoomsProvider extends ChangeNotifier {
           filename: '',
           formcode: '',
           formname: '',
-          attachmenttype: 'file'));
+          attachmenttype: 'file',
+          esigndocumentdata:
+              ESignDocument(esigndocumentid: '', formdefinitionid: '')));
     }
 
     notifyListeners();
