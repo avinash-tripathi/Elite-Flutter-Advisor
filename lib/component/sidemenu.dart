@@ -260,6 +260,35 @@ class SideMenu extends StatelessWidget {
                       ),
                     ),
                   ),
+                  Visibility(
+                    visible: true,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: (menuProvider.selectedMenu == 'Contracts')
+                              ? const Color.fromARGB(255, 234, 231, 231)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(30.0)),
+                      child: ListTile(
+                        leading: SizedBox(
+                          width: 20,
+                          child: SvgPicture.asset(
+                            'assets/contract.svg',
+                            //color: AppColors.iconGray,
+                          ),
+                        ),
+                        title: const Text(
+                          'Contracts',
+                          style: sideMenuStyle,
+                        ),
+                        onTap: !validLicense
+                            ? null
+                            : () {
+                                sideProvider.selectedMenu = 'Contracts';
+                                Navigator.pushNamed(context, "/contracts");
+                              },
+                      ),
+                    ),
+                  ),
                   Container(
                     decoration: BoxDecoration(
                         color: (menuProvider.selectedMenu == 'Account')
@@ -408,6 +437,9 @@ class SideMenu extends StatelessWidget {
 
                         lgnProvider.logedinUser = Account(rolewithemployer: []);
                         lgnProvider.clearLoggedInCredential();
+                        lgnProvider.passwordController.text = "";
+                        lgnProvider.emailController.text = "";
+
                         final launchProvider =
                             Provider.of<LaunchProvider>(context, listen: false);
                         launchProvider.launchpacks.clear();

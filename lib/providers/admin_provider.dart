@@ -14,6 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:advisorapp/models/role.dart';
 
 class AdminProvider extends ChangeNotifier {
+  bool _viewIframe = false;
+  bool get viewIframe => _viewIframe;
+
+  set viewIframe(bool obj) {
+    _viewIframe = obj;
+    notifyListeners();
+  }
+
   bool _updatestatus = false;
 
   Future<void> updateStatus(accountcode, userstatus) async {

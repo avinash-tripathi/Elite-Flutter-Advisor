@@ -10,6 +10,7 @@ import 'package:advisorapp/forms/accountform/companyprofile.dart';
 import 'package:advisorapp/forms/accountform/invitecoworker.dart';
 import 'package:advisorapp/forms/accountform/lp.dart';
 import 'package:advisorapp/forms/accountform/yourprofile.dart';
+import 'package:advisorapp/forms/contracts/mycontracts.dart';
 
 import 'package:advisorapp/forms/employer/employerforms.dart';
 import 'package:advisorapp/forms/employer/sl_employerlaunchpack.dart';
@@ -128,7 +129,11 @@ class RouteGenerator {
                   ));
         }
         break; */
-
+      case '/contracts':
+        {
+          matPageRoute = NoDuplicatePageRoute(builder: (_) => MyContracts());
+        }
+        break;
       case '/Partner':
         {
           matPageRoute = NoDuplicatePageRoute(builder: (_) => PartnerForm());

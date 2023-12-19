@@ -3,7 +3,6 @@ import 'package:advisorapp/models/actionlaunchpack.dart';
 class AccountAction {
   String accountcode;
   String employercode;
-
   List<ActionLaunchPack> formfileupload;
 
   AccountAction(
@@ -26,7 +25,8 @@ class AccountAction {
     map['accountcode'] = accountcode;
     map['employercode'] = employercode;
     //map['formfileupload'] = formfileupload;
-    map['formfileupload'] = formfileupload.map((form) => form.toMap()).toList();
+    map['formfileupload'] =
+        formfileupload.map((form) => form.toJsonMap()).toList();
 
     return map;
   }

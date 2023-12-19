@@ -8,6 +8,7 @@ import 'package:advisorapp/custom/custom_tooltip.dart';
 
 import 'package:advisorapp/forms/employer/sl_employerform.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/partner.dart';
@@ -245,8 +246,13 @@ class EmployerForms extends StatelessWidget {
                                                                   .setLoadingStatus(
                                                                       index,
                                                                       true);
-                                                              LaunchPack obj =
-                                                                  LaunchPack();
+                                                              LaunchPack obj = LaunchPack(
+                                                                  accountowners: [],
+                                                                  esigndocumentdata: ESignDocument(
+                                                                      esigndocumentid:
+                                                                          '',
+                                                                      formdefinitionid:
+                                                                          ''));
 
                                                               obj.employercode =
                                                                   prvView
@@ -326,7 +332,9 @@ class EmployerForms extends StatelessWidget {
                                                                           true);
                                                                       LaunchPack
                                                                           obj =
-                                                                          LaunchPack();
+                                                                          LaunchPack(
+                                                                              accountowners: [],
+                                                                              esigndocumentdata: ESignDocument(esigndocumentid: '', formdefinitionid: ''));
 
                                                                       obj.employercode = prvEmployer
                                                                           .employers[

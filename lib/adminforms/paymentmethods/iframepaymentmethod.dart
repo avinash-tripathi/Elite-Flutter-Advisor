@@ -1,27 +1,27 @@
 import 'dart:html' as html;
-import 'package:advisorapp/providers/launch_provider.dart';
+import 'package:advisorapp/providers/admin_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
 import 'package:provider/provider.dart';
 
-class MyIframe extends StatelessWidget {
+class PaymentMethodIframe extends StatelessWidget {
   final String src;
 
-  const MyIframe({super.key, required this.src});
+  const PaymentMethodIframe({super.key, required this.src});
 
   @override
   Widget build(BuildContext context) {
     // Register the view factory with a dynamic src
     ui.platformViewRegistry.registerViewFactory(
-      'esigniframe',
+      src,
       (int viewId) {
         /*  final l = Provider.of<LaunchProvider>(context, listen: false);
         l.viewIframe = false; */
         final iframe = html.IFrameElement()
-          ..width = '550'
-          ..height = '650'
+          ..width = '100%'
+          ..height = '100%'
           ..style.border = 'none';
 
         // Set the src dynamically
@@ -38,13 +38,13 @@ class MyIframe extends StatelessWidget {
       children: [
         Expanded(
           child: HtmlElementView(
-            viewType: 'esigniframe',
+            viewType: src,
             onPlatformViewCreated: (id) {},
           ),
         ),
         IconButton(
             onPressed: () {
-              Provider.of<LaunchProvider>(context, listen: false).viewIframe =
+              Provider.of<AdminProvider>(context, listen: false).viewIframe =
                   false;
             },
             icon: const Icon(

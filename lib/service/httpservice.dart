@@ -10,6 +10,7 @@ import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/companytype.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerprofile.dart';
+import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/idea.dart';
 //import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/launchpack.dart';
@@ -475,6 +476,7 @@ class HttpService {
       if (objResponse.statusCode == 200) {
         AccountAction objectR =
             AccountAction.fromJson(jsonDecode(objResponse.body));
+
         return objectR;
       }
       return null;
@@ -1670,6 +1672,39 @@ class HttpService {
       }
     } catch (e) {
       return [];
+    }
+  }
+
+  Future<ESignEmbeddedResponse> generateESignEmbeddedURL(
+      documentid, formdefinitionid) async {
+    try {
+      Uri uri = Uri.parse(
+          "${serviceURL}Advisor/GenerateESignEmbededURL?documentId=$documentid&formDefinitionID=$formdefinitionid");
+      var objResponse = await http.Client().get(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Charset': 'utf-8',
+          "Access-Control-Allow-Origin":
+              "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials":
+              "true", // Required for cookies, authorization headers with HTTPS
+          "Access-Control-Allow-Headers":
+              "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+          "Access-Control-Allow-Methods": "POST, OPTIONS"
+        },
+      );
+
+      if (objResponse.statusCode == 200) {
+        ESignEmbeddedResponse objectR =
+            ESignEmbeddedResponse.fromJson(jsonDecode(objResponse.body));
+
+        return objectR;
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      return ESignEmbeddedResponse(formDefinitionId: '', url: '');
     }
   }
 }

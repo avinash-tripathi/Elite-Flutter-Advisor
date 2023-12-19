@@ -1,5 +1,6 @@
 import 'package:advisorapp/models/account.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
+import 'package:advisorapp/models/esign/esigndocument.dart';
 
 class LaunchPack {
   String launchcode;
@@ -21,7 +22,9 @@ class LaunchPack {
   Account? tocodedata;
   String formcodewithextension;
   ActionLaunchPack? actionitemdata;
-  String attachmenttype = 'file';
+  String attachmenttype = 'none';
+  List<Account> accountowners = [];
+  ESignDocument esigndocumentdata;
 
   LaunchPack(
       {this.launchcode = '0',
@@ -43,36 +46,59 @@ class LaunchPack {
       this.tocodedata,
       this.formcodewithextension = '',
       this.actionitemdata,
-      this.attachmenttype = 'file'});
+      this.attachmenttype = 'none',
+      required this.accountowners,
+      required this.esigndocumentdata});
   factory LaunchPack.fromJson(Map<String, dynamic> json) {
+    List<dynamic>? accountOwnersJson = json['accountowners'];
+    List<Account>? accountOwners = accountOwnersJson == null
+        ? []
+        : (accountOwnersJson).map((oJson) => Account.fromJson(oJson)).toList();
+    if (accountOwners.isEmpty) {
+      accountOwners.add(Account(rolewithemployer: []));
+    }
+
+    List<dynamic>? esigndocumentdataJson = json['esigndocumentdata'];
+    List<ESignDocument>? esigndocument = esigndocumentdataJson == null
+        ? []
+        : (esigndocumentdataJson)
+            .map((oJson) => ESignDocument.fromJson(oJson))
+            .toList();
+    if (esigndocument.isEmpty) {
+      esigndocument
+          .add(ESignDocument(esigndocumentid: '', formdefinitionid: ''));
+    }
+
     return LaunchPack(
-      launchcode: json['launchcode'],
-      accountcode: json['accountcode'],
-      employercode: json['employercode'],
-      fromcode: json['fromcode'] ?? '',
-      tocode: json['tocode'] ?? '',
-      fromname: json['fromname'] ?? '',
-      toname: json['toname'] ?? '',
-      formcode: json['formcode'] ?? '',
-      formname: json['formname'] ?? '',
-      formstatus: json['formstatus'] ?? '',
-      duedate: json['duedate'] ?? '',
-      visibility: json['visibility'] ?? 'public',
-      isprivate: json['isprivate'] ?? false,
-      formdomainname: json['formdomainname'] ?? '',
-      employername: json['employername'] ?? '',
-      formcodewithextension: json['formcodewithextension'] ?? '',
-      fromcodedata: (json['fromcodedata'] != null)
-          ? Account.fromJson(json['fromcodedata'][0])
-          : null,
-      tocodedata: json['tocodedata'] != null
-          ? Account.fromJson(json['tocodedata'][0])
-          : null,
-      actionitemdata: (json['actionitemdata'] != null)
-          ? ActionLaunchPack.fromJson(json['actionitemdata'][0])
-          : null,
-      attachmenttype: json['attachmenttype'] ?? '',
-    );
+        launchcode: json['launchcode'],
+        accountcode: json['accountcode'],
+        employercode: json['employercode'],
+        fromcode: json['fromcode'] ?? '',
+        tocode: json['tocode'] ?? '',
+        fromname: json['fromname'] ?? '',
+        toname: json['toname'] ?? '',
+        formcode: json['formcode'] ?? '',
+        formname: json['formname'] ?? '',
+        formstatus: json['formstatus'] ?? '',
+        duedate: json['duedate'] ?? '',
+        visibility: json['visibility'] ?? 'public',
+        isprivate: json['isprivate'] ?? false,
+        formdomainname: json['formdomainname'] ?? '',
+        employername: json['employername'] ?? '',
+        formcodewithextension: json['formcodewithextension'] ?? '',
+        fromcodedata: (json['fromcodedata'] != null)
+            ? Account.fromJson(json['fromcodedata'][0])
+            : null,
+        tocodedata: json['tocodedata'] != null
+            ? Account.fromJson(json['tocodedata'][0])
+            : null,
+        actionitemdata:
+            (json['actionitemdata'] != null || json['actionitemdata'] != '')
+                ? ActionLaunchPack.fromJson(json['actionitemdata'][0])
+                : null,
+        attachmenttype: json['attachmenttype'] ?? '',
+        accountowners: accountOwners,
+        esigndocumentdata: esigndocument[0]);
   }
   Map toMap() {
     var map = <String, dynamic>{};

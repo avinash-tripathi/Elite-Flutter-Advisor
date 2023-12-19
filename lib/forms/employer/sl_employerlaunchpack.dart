@@ -6,14 +6,15 @@ import 'package:advisorapp/config/responsive.dart';
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/custom/custom_logoviewer.dart';
 import 'package:advisorapp/custom/custom_profileviewer.dart';
-
 import 'package:advisorapp/forms/room/employerinroom.dart';
 import 'package:advisorapp/models/account.dart';
 import 'package:advisorapp/models/accountaction.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/employerassistant.dart';
+import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/esign/esigndocument.dart';
+import 'package:advisorapp/esignwidget/iframeEmployer.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/models/mail/newactionitemmail.dart';
@@ -67,7 +68,6 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                 onPressed: () {
                                   prvEmployer.setSelectedFromAssistToNull();
                                   prvEmployer.setSelectedToAssistToNull();
-
                                   prvEmployer.addActionLaunchPack();
                                 },
                                 child: const Text(
@@ -77,8 +77,6 @@ class SLEmployerLaunchPack extends StatelessWidget {
                             InkWell(
                               onTap: () {
                                 Navigator.pop(context);
-                                /*  Navigator.of(context)
-                                    .popAndPushNamed("/Employer"); */
                               },
                               child: const Icon(
                                 Icons.keyboard_return,
@@ -92,7 +90,7 @@ class SLEmployerLaunchPack extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 20),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
                                 width: SizeConfig.screenWidth / 4,
@@ -147,7 +145,7 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                       : Consumer<EmployerProvider>(
                                           builder: (context, prvText, child) {
                                           return getTextValue(selectedEmployer);
-                                        }))
+                                        })),
                             ],
                           ),
                         ),
@@ -172,230 +170,222 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                               Consumer<EmployerProvider>(
                                                   builder:
                                                       (context, prvDis, child) {
-                                                return SingleChildScrollView(
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  child: DataTable(
-                                                      columnSpacing: 8.0,
-                                                      columns: [
-                                                        DataColumn(
-                                                            label: SizedBox(
-                                                          width: SizeConfig
-                                                                  .screenWidth /
-                                                              25,
-                                                          child: const Text(
-                                                              'From'),
-                                                        )),
-                                                        DataColumn(
-                                                            label: SizedBox(
-                                                          width: SizeConfig
-                                                                  .screenWidth /
-                                                              25,
-                                                          child: const Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    left: 10),
-                                                            child: Text('To'),
-                                                          ),
-                                                        )),
-                                                        DataColumn(
-                                                            label: SizedBox(
-                                                          width: SizeConfig
-                                                                  .screenWidth /
-                                                              4,
-                                                          child: const Center(
-                                                              child: Text(
-                                                                  'Action Item')),
-                                                        )),
-                                                        DataColumn(
-                                                            label: SizedBox(
-                                                          width: SizeConfig
-                                                                  .screenWidth /
-                                                              12,
-                                                          child: const Center(
-                                                              child: Text(
-                                                                  'Due Date')),
-                                                        )),
-                                                        DataColumn(
-                                                            label: SizedBox(
-                                                          width: SizeConfig
-                                                                  .screenWidth /
-                                                              8,
-                                                          child: const Center(
-                                                              child: Text(
-                                                                  'Status')),
-                                                        )),
-                                                        /*  DataColumn(
-                                                            label: SizedBox(
-                                                          width: 100.0,
-                                                          child: Center(
-                                                              child: Text(
-                                                                  'Action')),
-                                                        )), */
-                                                      ],
-                                                      rows: [
-                                                        for (var i = 0;
-                                                            i <
-                                                                prvDis
-                                                                    .launchpacks
-                                                                    .length;
-                                                            i++)
-                                                          DataRow.byIndex(
-                                                              index: i,
-                                                              cells: [
-                                                                DataCell(
-                                                                  Row(
-                                                                    children: [
-                                                                      CustomProfileViewer(
-                                                                          account:
-                                                                              prvDis.launchpacks[i].fromcodedata ?? Account(rolewithemployer: [])),
-                                                                      /*   Center(
-                                                                          child:
-                                                                              Text(
-                                                                        prvDis
-                                                                            .launchpacks[i]
-                                                                            .fromname,
-                                                                      )), */
-                                                                    ],
-                                                                  ),
+                                                return prvDis.viewIframe
+                                                    ? SizedBox(
+                                                        width: SizeConfig
+                                                            .screenWidth,
+                                                        height: SizeConfig
+                                                                .screenHeight -
+                                                            120,
+                                                        child: IframeEmployer(
+                                                          src: prvDis
+                                                              .esignembededdata!
+                                                              .url,
+                                                        ),
+                                                      )
+                                                    : SingleChildScrollView(
+                                                        scrollDirection:
+                                                            Axis.horizontal,
+                                                        child: DataTable(
+                                                            columnSpacing: 8.0,
+                                                            columns: [
+                                                              DataColumn(
+                                                                  label:
+                                                                      SizedBox(
+                                                                width: SizeConfig
+                                                                        .screenWidth /
+                                                                    25,
+                                                                child:
+                                                                    const Text(
+                                                                        'From'),
+                                                              )),
+                                                              DataColumn(
+                                                                  label:
+                                                                      SizedBox(
+                                                                width: SizeConfig
+                                                                        .screenWidth /
+                                                                    25,
+                                                                child:
+                                                                    const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                          left:
+                                                                              10),
+                                                                  child: Text(
+                                                                      'To'),
                                                                 ),
-                                                                DataCell(
-                                                                  Row(
-                                                                    children: [
-                                                                      Center(
-                                                                        child: CustomProfileViewer(
-                                                                            account:
-                                                                                prvDis.launchpacks[i].tocodedata ?? Account(rolewithemployer: [])),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                                DataCell(
-                                                                  GestureDetector(
-                                                                      onTap:
-                                                                          () async {
-                                                                        Uri uri =
-                                                                            Uri.parse("$defaultActionItemPath${prvDis.launchpacks[i].formcode}/${prvDis.launchpacks[i].formcodewithextension}");
-                                                                        if (prvDis
-                                                                            .launchpacks[i]
-                                                                            .formcodewithextension
-                                                                            .isNotEmpty) {
-                                                                          if (await canLaunchUrl(
-                                                                              uri)) {
-                                                                            await launchUrl(uri);
-                                                                          }
-                                                                        } else {
-                                                                          // Handle error when unable to launch the URL
-                                                                        }
-                                                                      },
-                                                                      child:
-                                                                          Center(
-                                                                        child:
-                                                                            Text(
-                                                                          prvDis
-                                                                              .launchpacks[i]
-                                                                              .formname,
-                                                                          style:
-                                                                              TextStyle(decoration: prvDis.launchpacks[i].formcodewithextension.isNotEmpty ? TextDecoration.underline : null),
+                                                              )),
+                                                              DataColumn(
+                                                                  label:
+                                                                      SizedBox(
+                                                                width: SizeConfig
+                                                                        .screenWidth /
+                                                                    4,
+                                                                child: const Center(
+                                                                    child: Text(
+                                                                        'Action Item')),
+                                                              )),
+                                                              DataColumn(
+                                                                  label:
+                                                                      SizedBox(
+                                                                width: SizeConfig
+                                                                        .screenWidth /
+                                                                    12,
+                                                                child: const Center(
+                                                                    child: Text(
+                                                                        'Due Date')),
+                                                              )),
+                                                              DataColumn(
+                                                                  label:
+                                                                      SizedBox(
+                                                                width: SizeConfig
+                                                                        .screenWidth /
+                                                                    8,
+                                                                child: const Center(
+                                                                    child: Text(
+                                                                        'Status')),
+                                                              )),
+                                                            ],
+                                                            rows: [
+                                                              for (var i = 0;
+                                                                  i <
+                                                                      prvDis
+                                                                          .launchpacks
+                                                                          .length;
+                                                                  i++)
+                                                                DataRow.byIndex(
+                                                                    index: i,
+                                                                    cells: [
+                                                                      DataCell(
+                                                                        Row(
+                                                                          children: [
+                                                                            CustomProfileViewer(account: prvDis.launchpacks[i].fromcodedata ?? Account(rolewithemployer: [])),
+                                                                          ],
                                                                         ),
-                                                                      )),
-                                                                ),
-                                                                DataCell(
-                                                                  Center(
-                                                                    child: Row(
-                                                                      children: [
-                                                                        Consumer<EmployerProvider>(builder: (context,
-                                                                            prvEDate,
-                                                                            child) {
-                                                                          return Text(
-                                                                            DateFormat('dd-MMM-yyyy').format(DateTime.parse(prvEDate.launchpacks[i].duedate)),
-                                                                          );
-                                                                        }),
-                                                                        IconButton(
-                                                                            onPressed:
-                                                                                () {
-                                                                              showDatePicker(
-                                                                                context: context,
-                                                                                initialDate: DateTime.now(),
-                                                                                firstDate: DateTime(2000),
-                                                                                lastDate: DateTime(2100),
-                                                                              ).then((selectedDate) async {
-                                                                                if (selectedDate != null) {
-                                                                                  bool result = await EliteDialog(context, 'Please confirm', 'Do you want to save the changes?', 'Yes', 'No');
-                                                                                  if (result) {
-                                                                                    prvDis.setLaunchDueDate(i, selectedDate);
-                                                                                    prvEmployer.updateLaunchFormStatus(prvEmployer.launchpacks[i].accountcode, prvEmployer.launchpacks[i].employercode, prvEmployer.launchpacks[i].formcode, prvEmployer.launchpacks[i].formstatus, prvEmployer.launchpacks[i].duedate);
-                                                                                  }
-                                                                                }
-                                                                              });
-                                                                            },
-                                                                            icon:
-                                                                                const Icon(
-                                                                              Icons.date_range,
-                                                                              color: AppColors.blue,
-                                                                            )),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                DataCell(
-                                                                  Center(
-                                                                    child: Consumer<
-                                                                            EmployerProvider>(
-                                                                        builder: (context,
-                                                                            prvLS,
-                                                                            child) {
-                                                                      return DropdownButton<
-                                                                          LaunchStatus>(
-                                                                        value: prvLS.launchStatusList.firstWhere(
-                                                                            (element) =>
-                                                                                element.code ==
-                                                                                prvDis.launchpacks[i].formstatus,
-                                                                            orElse: () => prvLS.launchStatusList[0]),
-                                                                        onChanged:
-                                                                            (newValue) async {
-                                                                          // add your code to handle the value change here
-                                                                          bool result = await EliteDialog(
-                                                                              context,
-                                                                              'Please confirm',
-                                                                              'Do you want to save the changes?',
-                                                                              'Yes',
-                                                                              'No');
-                                                                          if (result) {
-                                                                            prvLS.setLaunchStatus(i,
-                                                                                newValue!);
-                                                                            prvEmployer.updateLaunchFormStatus(
-                                                                                prvEmployer.launchpacks[i].accountcode,
-                                                                                prvEmployer.launchpacks[i].employercode,
-                                                                                prvEmployer.launchpacks[i].formcode,
-                                                                                prvEmployer.launchpacks[i].formstatus,
-                                                                                prvEmployer.launchpacks[i].duedate);
-                                                                          }
-                                                                        },
-                                                                        items: prvDis
-                                                                            .launchStatusList
-                                                                            .where((e) =>
-                                                                                e.key ==
-                                                                                prvDis.launchpacks[i].attachmenttype)
-                                                                            .map((status) {
-                                                                          return DropdownMenuItem<
-                                                                              LaunchStatus>(
-                                                                            value:
-                                                                                status,
-                                                                            child:
-                                                                                Text(
-                                                                              status.name,
-                                                                              style: getColoredTextStyle(status.code),
+                                                                      ),
+                                                                      DataCell(
+                                                                        Row(
+                                                                          children: [
+                                                                            Center(
+                                                                              child: CustomProfileViewer(account: prvDis.launchpacks[i].tocodedata ?? Account(rolewithemployer: [])),
                                                                             ),
-                                                                          );
-                                                                        }).toList(),
-                                                                      );
-                                                                    }),
-                                                                  ),
-                                                                ),
-                                                              ]),
-                                                      ]),
-                                                );
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      DataCell(
+                                                                        GestureDetector(
+                                                                            onTap:
+                                                                                () async {
+                                                                              String downloadAction = "Advisor/DownloadESignDocumentAsync?documentId=";
+                                                                              Uri uri = Uri.parse("");
+                                                                              if (prvDis.launchpacks[i].attachmenttype == "esign" && prvDis.launchpacks[i].esigndocumentdata.processdocumentId!.isNotEmpty) {
+                                                                                uri = Uri.parse("$webApiserviceURL$downloadAction${prvDis.launchpacks[i].esigndocumentdata.processdocumentId}");
+                                                                              } else {
+                                                                                uri = Uri.parse("$defaultActionItemPath${prvDis.launchpacks[i].formcode}/${prvDis.launchpacks[i].formcodewithextension}");
+                                                                              }
+
+                                                                              if (prvDis.launchpacks[i].formcodewithextension.isNotEmpty) {
+                                                                                if (await canLaunchUrl(uri)) {
+                                                                                  await launchUrl(uri);
+                                                                                }
+                                                                              } else {
+                                                                                // Handle error when unable to launch the URL
+                                                                              }
+                                                                            },
+                                                                            child:
+                                                                                Center(
+                                                                              child: ListTile(
+                                                                                leading: Text(
+                                                                                  prvDis.launchpacks[i].formname,
+                                                                                  style: TextStyle(decoration: prvDis.launchpacks[i].formcodewithextension.isNotEmpty ? TextDecoration.underline : null),
+                                                                                ),
+                                                                                trailing: prvDis.launchpacks[i].attachmenttype == "esign"
+                                                                                    ? IconButton(
+                                                                                        icon: Image.asset("assets/ontask.png"),
+                                                                                        onPressed: () async {
+                                                                                          var docId = prvDis.launchpacks[i].esigndocumentdata.esigndocumentid;
+                                                                                          var formdefinitionId = prvDis.launchpacks[i].esigndocumentdata.formdefinitionid;
+                                                                                          await prvDis.generateESignEmbeddedURL(docId, formdefinitionId).then((value) {
+                                                                                            prvDis.viewIframe = true;
+                                                                                          });
+                                                                                        },
+                                                                                      )
+                                                                                    : null,
+                                                                              ),
+                                                                            )),
+                                                                      ),
+                                                                      DataCell(
+                                                                        Center(
+                                                                          child:
+                                                                              Row(
+                                                                            children: [
+                                                                              Consumer<EmployerProvider>(builder: (context, prvEDate, child) {
+                                                                                return Text(
+                                                                                  DateFormat('MM-dd-yyyy').format(DateTime.parse(prvEDate.launchpacks[i].duedate)),
+                                                                                );
+                                                                              }),
+                                                                              IconButton(
+                                                                                  onPressed: () {
+                                                                                    showDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: DateTime.now(),
+                                                                                      firstDate: DateTime(2000),
+                                                                                      lastDate: DateTime(2100),
+                                                                                    ).then((selectedDate) async {
+                                                                                      if (selectedDate != null) {
+                                                                                        bool result = await EliteDialog(context, 'Please confirm', 'Do you want to save the changes?', 'Yes', 'No');
+                                                                                        if (result) {
+                                                                                          prvDis.setLaunchDueDate(i, selectedDate);
+                                                                                          prvEmployer.updateLaunchFormStatus(prvEmployer.launchpacks[i].accountcode, prvEmployer.launchpacks[i].employercode, prvEmployer.launchpacks[i].formcode, prvEmployer.launchpacks[i].formstatus, prvEmployer.launchpacks[i].duedate);
+                                                                                        }
+                                                                                      }
+                                                                                    });
+                                                                                  },
+                                                                                  icon: const Icon(
+                                                                                    Icons.date_range,
+                                                                                    color: AppColors.blue,
+                                                                                  )),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      DataCell(
+                                                                        Center(
+                                                                          child: Consumer<EmployerProvider>(builder: (context,
+                                                                              prvLS,
+                                                                              child) {
+                                                                            return DropdownButton<LaunchStatus>(
+                                                                              value: prvLS.launchStatusList.firstWhere((element) => element.code == prvDis.launchpacks[i].formstatus, orElse: () => prvLS.launchStatusList[0]),
+                                                                              onChanged: (prvDis.launchpacks[i].attachmenttype == "esign")
+                                                                                  ? null
+                                                                                  : (newValue) async {
+                                                                                      // add your code to handle the value change here
+                                                                                      bool result = await EliteDialog(context, 'Please confirm', 'Do you want to save the changes?', 'Yes', 'No');
+                                                                                      if (result) {
+                                                                                        prvLS.setLaunchStatus(i, newValue!);
+                                                                                        prvEmployer.updateLaunchFormStatus(prvEmployer.launchpacks[i].accountcode, prvEmployer.launchpacks[i].employercode, prvEmployer.launchpacks[i].formcode, prvEmployer.launchpacks[i].formstatus, prvEmployer.launchpacks[i].duedate);
+                                                                                      }
+                                                                                    },
+                                                                              items: prvDis.launchStatusList
+                                                                                  .where((e) => e.key == prvDis.launchpacks[i].attachmenttype)
+                                                                                  .map((status) {
+                                                                                    return DropdownMenuItem<LaunchStatus>(
+                                                                                      value: status,
+                                                                                      child: Text(
+                                                                                        status.name,
+                                                                                        style: getColoredTextStyle(status.code),
+                                                                                      ),
+                                                                                    );
+                                                                                  })
+                                                                                  .toSet()
+                                                                                  .toList(),
+                                                                            );
+                                                                          }),
+                                                                        ),
+                                                                      ),
+                                                                    ]),
+                                                            ]),
+                                                      );
                                               }),
                                               const Divider(
                                                   color: AppColors.sidemenu),
@@ -616,7 +606,7 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                           style: TextStyle(
                                                                               color: (status.code == 'file')
                                                                                   ? Colors.blue
-                                                                                  : (status.code == 'docsign')
+                                                                                  : (status.code == 'esign')
                                                                                       ? Colors.green
                                                                                       : (status.code == 'inactive')
                                                                                           ? Colors.red
@@ -638,11 +628,10 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                             ActionLaunchPack
                                                                                 obj =
                                                                                 prvNew.actionlaunchpacks[i];
-
                                                                             await prvNew.pickFile(obj,
                                                                                 i);
                                                                           },
-                                                                  ),
+                                                                  )
                                                                 ],
                                                               ),
                                                               title: Tooltip(
@@ -679,9 +668,9 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                   Text(
                                                                       (prvNew.assistDueDate ==
                                                                               null)
-                                                                          ? DateFormat('dd-MMM-yyyy').format(DateTime
+                                                                          ? DateFormat('MM-dd-yyyy').format(DateTime
                                                                               .now())
-                                                                          : DateFormat('dd-MMM-yyyy').format(prvNew
+                                                                          : DateFormat('MM-dd-yyyy').format(prvNew
                                                                               .assistDueDate!),
                                                                       style: const TextStyle(
                                                                           fontSize:
@@ -711,43 +700,6 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                 ],
                                                               ),
                                                             ),
-                                                            /* Center(
-                                                              child:
-                                                                  TextFormField(
-                                                                readOnly: true,
-                                                                onTap:
-                                                                    () async {
-                                                                  prvNew.assistDueDate =
-                                                                      await showDatePicker(
-                                                                    context:
-                                                                        context,
-                                                                    initialDate:
-                                                                        prvNew
-                                                                            .assistDueDate!,
-                                                                    firstDate:
-                                                                        DateTime(
-                                                                            1900),
-                                                                    lastDate:
-                                                                        DateTime(
-                                                                            2100),
-                                                                  );
-                                                                },
-                                                                decoration:
-                                                                    InputDecoration(
-                                                                  hintText: (prvNew
-                                                                              .assistDueDate ==
-                                                                          null)
-                                                                      ? DateFormat(
-                                                                              'dd-MMM-yyyy')
-                                                                          .format(DateTime
-                                                                              .now())
-                                                                      : DateFormat(
-                                                                              'dd-MMM-yyyy')
-                                                                          .format(
-                                                                              prvNew.assistDueDate!),
-                                                                ),
-                                                              ),
-                                                            ), */
                                                           ),
                                                           DataCell(
                                                             Center(
@@ -798,9 +750,22 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                             renewalpack: false,
                                                                             filename: prvNew.actionlaunchpacks[i].filename,
                                                                             attachmenttype: prvNew.actionlaunchpacks[i].attachmenttype,
+                                                                            contentmimetype: prvNew.actionlaunchpacks[i].contentmimetype,
                                                                             esigndocumentdata: ESignDocument(esigndocumentid: '', formdefinitionid: ''));
                                                                         lists.add(
                                                                             obj);
+
+                                                                        if (obj.fileextension.isEmpty && obj.attachmenttype == 'esign' ||
+                                                                            obj.attachmenttype ==
+                                                                                'file') {
+                                                                          EliteDialog(
+                                                                              context,
+                                                                              "Alert",
+                                                                              "Please attach a valid document.",
+                                                                              "Ok",
+                                                                              "Cancel");
+                                                                          return;
+                                                                        }
 
                                                                         AccountAction objAct = AccountAction(
                                                                             accountcode:
@@ -811,14 +776,14 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                         await prvNew
                                                                             .saveActionLaunchPack(objAct,
                                                                                 i)
-                                                                            .then((value) {
+                                                                            .then((value) async {
                                                                           //write code to insert directly in launchpack for this employer only.
                                                                           ActionLaunchPack
                                                                               objNewAdded =
                                                                               prvNew.actionlaunchpacks[i];
                                                                           LaunchPack
                                                                               obj =
-                                                                              LaunchPack();
+                                                                              LaunchPack(accountowners: [], esigndocumentdata: ESignDocument(esigndocumentid: '', formdefinitionid: ''));
                                                                           obj.formcode =
                                                                               objNewAdded.formcode;
                                                                           obj.fromcode = prvNew
@@ -838,9 +803,11 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                               .launchcode;
                                                                           obj.duedate =
                                                                               DateFormat('yyyy-MM-dd').format(prvEmployer.assistDueDate!);
-                                                                          obj.formstatus = objNewAdded.attachmenttype == 'file'
+                                                                          obj.formstatus =
+                                                                              'esigninprogress';
+                                                                          /*  obj.formstatus = objNewAdded.attachmenttype == 'file'
                                                                               ? 'InProgress'
-                                                                              : 'DocuSigntobesent';
+                                                                              : 'none'; */
                                                                           obj.visibility = (prvNew.selectedVisibilityStatus)
                                                                               ? 'private'
                                                                               : 'public';
@@ -854,18 +821,23 @@ class SLEmployerLaunchPack extends StatelessWidget {
                                                                               .workemail;
                                                                           objMail.employerCompanyName =
                                                                               selectedEmployer.companyname;
-
-                                                                          prvNew
-                                                                              .insertLaunchPackForEmployer(obj)
+                                                                          await prvNew
+                                                                              .generateESignEmbeddedURL(prvNew.actionlaunchpacks[i].esigndocumentdata.esigndocumentid, prvNew.actionlaunchpacks[i].esigndocumentdata.formdefinitionid)
                                                                               .then((value) {
-                                                                            //remove actionitem from list and clear the array.
-                                                                            prvNew.sendAssignmentEmail(objMail);
-                                                                            prvNew.clearActionLaunchPack();
-                                                                            prvNew.getInitialLaunchPack(
-                                                                                selectedEmployer.accountcode,
-                                                                                selectedEmployer.employercode,
-                                                                                'Advisor');
+                                                                            prvNew.viewIframe =
+                                                                                true;
                                                                           });
+                                                                          if (obj
+                                                                              .formcode
+                                                                              .isNotEmpty) {
+                                                                            await prvNew.insertLaunchPackForEmployer(obj).then((value) async {
+                                                                              //remove actionitem from list and clear the array.
+                                                                              prvNew.sendAssignmentEmail(objMail);
+
+                                                                              prvNew.clearActionLaunchPack();
+                                                                              prvNew.getInitialLaunchPack(selectedEmployer.accountcode, selectedEmployer.employercode, 'Advisor').then((value) async => {});
+                                                                            });
+                                                                          }
                                                                         });
                                                                       },
                                                                     ),
@@ -920,16 +892,6 @@ class SLEmployerLaunchPack extends StatelessWidget {
   }
 
   Text getTextValue(Employer obj) {
-    /*  String textValue = (obj.launchstatus == 'SENTLAUNCHPACK')
-        ? "${calculateDateDifference(obj.planeffectivedate)} Days to"
-        : getCurrentDateDiff(obj.planeffectivedate) > 0
-            ? 'SEND RENEWAL PACK'
-            : 'SEND LAUNCH PACK';
-    return Text(textValue,
-        style: TextStyle(
-            color: getCurrentDateDiff(obj.planeffectivedate) > 0
-                ? AppColors.black
-                : AppColors.white)); */
     String textValue = "";
 
     if (obj.launchstatus == 'SENTLAUNCHPACK') {

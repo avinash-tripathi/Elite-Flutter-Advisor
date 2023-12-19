@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:advisorapp/models/accountaction.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
+import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/service/esignservice.dart';
@@ -110,23 +111,39 @@ class LaunchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _viewIframe = false;
+  bool get viewIframe => _viewIframe;
+  set viewIframe(dynamic obj) {
+    _viewIframe = obj;
+    notifyListeners();
+  }
+
   Future<dynamic> downloadEsignDocument(documentid) async {
     _esigndocument = await EsignService().downloadEsignDocument(documentid);
     notifyListeners();
   }
 
-  dynamic _esignembededdata;
-  dynamic get esignembededdata => _esignembededdata;
-  set esignembededdata(dynamic obj) {
+  ESignEmbeddedResponse? _esignembededdata;
+  ESignEmbeddedResponse? get esignembededdata => _esignembededdata;
+  set esignembededdata(ESignEmbeddedResponse? obj) {
     _esignembededdata = obj;
     notifyListeners();
   }
 
-  Future<dynamic> generateESignEmbeddedURL(documentid, formdefinitionid) async {
-    return await EsignService()
+  Future<ESignEmbeddedResponse> generateESignEmbeddedURL(
+      documentid, formdefinitionid) async {
+    _esignembededdata = await EsignService()
         .generateESignEmbeddedURL(documentid, formdefinitionid);
+    return _esignembededdata!;
     //notifyListeners();
   }
+
+  /* bool _newAction = false;
+  bool get newAction => _newAction;
+  set newAction(dynamic obj) {
+    _newAction = obj;
+    notifyListeners();
+  } */
 
   Future<void> addLaunchPack() async {
     _launchpacks.add(ActionLaunchPack(
@@ -136,10 +153,11 @@ class LaunchProvider extends ChangeNotifier {
         formcode: '',
         formname: '',
         itemstatus: 'active',
-        attachmenttype: 'file',
+        attachmenttype: 'none',
         esigndocumentdata:
-            ESignDocument(esigndocumentid: '', formdefinitionid: '')));
-
+            ESignDocument(esigndocumentid: '', formdefinitionid: ''),
+        newAction: true));
+    //_newAction = true;
     notifyListeners();
   }
 
@@ -155,8 +173,10 @@ class LaunchProvider extends ChangeNotifier {
 
       _savedAccountAction = returnObject;
       setaccountActionSaved(index, false);
+      //_newAction = false;
     } catch (e) {
       setaccountActionSaved(index, false);
+      //_newAction = false;
     }
 
     notifyListeners();
@@ -220,6 +240,7 @@ class LaunchProvider extends ChangeNotifier {
     attachmentTypeList.clear();
     attachmentTypeList.add(AttachmentType(code: 'file', name: 'File'));
     attachmentTypeList.add(AttachmentType(code: 'esign', name: 'eSign'));
+    attachmentTypeList.add(AttachmentType(code: 'none', name: 'None'));
 
     //notifyListeners();
   }

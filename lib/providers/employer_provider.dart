@@ -7,6 +7,7 @@ import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerassistant.dart';
 import 'package:advisorapp/models/employerprofile.dart';
+import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/mail/newactionitemmail.dart';
@@ -459,7 +460,7 @@ class EmployerProvider extends ChangeNotifier {
 
   Future<void> pickFile(ActionLaunchPack obj, int index) async {
     final input = html.InputElement(type: 'file');
-    // MyFile objdummy = MyFile(name: '', base64: '', fileextension: '');
+
     input.click();
     await input.onChange.first;
     if (input.files!.isNotEmpty) {
@@ -469,13 +470,35 @@ class EmployerProvider extends ChangeNotifier {
       await reader.onLoad.first;
       final encoded = base64Encode(reader.result as List<int>);
       final fileext = ".${file.name.toString().split('.')[1]}";
-      /*  MyFile objMyFile =
-          MyFile(name: file.name, base64: encoded, fileextension: fileext); */
+
       actionlaunchpacks[index].filename = file.name;
       actionlaunchpacks[index].fileextension = fileext;
       actionlaunchpacks[index].filebase64 = encoded;
+      actionlaunchpacks[index].contentmimetype = file.type;
+
       notifyListeners();
     }
+  }
+
+  bool _viewIframe = false;
+  bool get viewIframe => _viewIframe;
+  set viewIframe(bool obj) {
+    _viewIframe = obj;
+    notifyListeners();
+  }
+
+  ESignEmbeddedResponse? _esignembededdata;
+  ESignEmbeddedResponse? get esignembededdata => _esignembededdata;
+  set esignembededdata(ESignEmbeddedResponse? obj) {
+    _esignembededdata = obj;
+    notifyListeners();
+  }
+
+  Future<void> generateESignEmbeddedURL(documentid, formdefinitionid) async {
+    _esignembededdata = await HttpService()
+        .generateESignEmbeddedURL(documentid, formdefinitionid);
+    // return _esignembededdata!;
+    notifyListeners();
   }
 
   Future<void> addActionLaunchPack() async {
@@ -486,9 +509,10 @@ class EmployerProvider extends ChangeNotifier {
         filename: '',
         formcode: '',
         formname: '',
-        attachmenttype: 'file',
+        attachmenttype: 'none',
         esigndocumentdata:
-            ESignDocument(esigndocumentid: '', formdefinitionid: '')));
+            ESignDocument(esigndocumentid: '', formdefinitionid: ''),
+        newAction: true));
 
     /* if (_actionlaunchpacks.isEmpty) {
       
@@ -511,6 +535,7 @@ class EmployerProvider extends ChangeNotifier {
         _actionlaunchpacks[index].launchpack = retObj.launchpack;
         _actionlaunchpacks[index].renewalpack = retObj.renewalpack;
         _actionlaunchpacks[index].attachmenttype = retObj.attachmenttype;
+        _actionlaunchpacks[index].esigndocumentdata = retObj.esigndocumentdata;
       });
 
       savingLaunchPack = false;
@@ -677,17 +702,23 @@ class EmployerProvider extends ChangeNotifier {
     launchStatusList
         .add(LaunchStatus(code: 'hold', name: 'On Hold', key: 'file'));
     launchStatusList
-        .add(LaunchStatus(code: 'Not sent', name: 'Not sent', key: 'file'));
+        .add(LaunchStatus(code: 'notsent', name: 'Not sent', key: 'file'));
+
+    launchStatusList
+        .add(LaunchStatus(code: 'none', name: 'Not sent', key: 'none'));
+    launchStatusList.add(
+        LaunchStatus(code: 'noneInProgress', name: 'In Progress', key: 'none'));
+    launchStatusList
+        .add(LaunchStatus(code: 'nonecomplete', name: 'Complete', key: 'none'));
+    launchStatusList
+        .add(LaunchStatus(code: 'nonehold', name: 'On Hold', key: 'none'));
 
     launchStatusList.add(LaunchStatus(
-        code: 'DocuSigntobesent', name: 'DocuSign to be sent', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignviewed', name: 'DocuSign viewed', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignexecuted', name: 'DocuSign executed', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignexpired', name: 'DocuSign expired', key: 'docsign'));
-
+        code: 'esigninprogress', name: 'In Progress', key: 'esign'));
+    launchStatusList.add(
+        LaunchStatus(code: 'esigncanceled', name: 'Canceled', key: 'esign'));
+    launchStatusList.add(
+        LaunchStatus(code: 'esigncomplete', name: 'Complete', key: 'esign'));
     notifyListeners();
   }
 
@@ -696,7 +727,8 @@ class EmployerProvider extends ChangeNotifier {
   Future<void> getAttachmentTypeList() async {
     attachmentTypeList.clear();
     attachmentTypeList.add(AttachmentType(code: 'file', name: 'File'));
-    attachmentTypeList.add(AttachmentType(code: 'docsign', name: 'DocSign'));
+    attachmentTypeList.add(AttachmentType(code: 'esign', name: 'esign'));
+    attachmentTypeList.add(AttachmentType(code: 'none', name: 'None'));
 
     //notifyListeners();
   }

@@ -44,8 +44,8 @@ class LoginForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const MicrosoftAuthWidget(),
-                  const GoogleAuthWidget(),
+                  //const MicrosoftAuthWidget(),
+                  //const GoogleAuthWidget(),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: defaultPadding, horizontal: defaultPadding),

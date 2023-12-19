@@ -741,7 +741,14 @@ class MyRoom extends StatelessWidget {
                                                   ActionLaunchPack objNewAdded =
                                                       prvNew
                                                           .actionlaunchpacks[i];
-                                                  LaunchPack obj = LaunchPack();
+                                                  LaunchPack obj = LaunchPack(
+                                                      accountowners: [],
+                                                      esigndocumentdata:
+                                                          ESignDocument(
+                                                              esigndocumentid:
+                                                                  '',
+                                                              formdefinitionid:
+                                                                  ''));
                                                   obj.formcode =
                                                       objNewAdded.formcode;
                                                   obj.attachmenttype =

@@ -154,19 +154,25 @@ bool areValidEmails(String text, String domain) {
 }
 
 TextStyle getColoredTextStyle(String parameter) {
-  if (parameter == 'InProgress' ||
+  if (parameter == 'noneInProgress' ||
+      parameter == 'InProgress' ||
+      parameter == 'inprogress' ||
       parameter == 'private' ||
-      parameter == 'DocuSigntobesent') {
+      parameter == 'esigninprogress') {
     return const TextStyle(color: AppColors.blue);
-  } else if (parameter == 'complete' ||
+  } else if (parameter == 'nonecomplete' ||
+      parameter == 'complete' ||
       parameter == 'public' ||
-      parameter == 'DocuSignviewed') {
+      parameter == 'esigncomplete') {
     return const TextStyle(color: AppColors.green);
-  } else if (parameter == 'hold' || parameter == 'DocuSignexpired') {
+  } else if (parameter == 'nonehold' ||
+      parameter == 'hold' ||
+      parameter == 'canceled' ||
+      parameter == 'esigncanceled') {
     return const TextStyle(color: AppColors.red);
-  } else if (parameter == 'Not sent' ||
+  } else if (parameter == 'notsent' ||
       parameter == 'self' ||
-      parameter == 'DocuSignexecuted') {
+      parameter == 'none') {
     return const TextStyle(color: Colors.amber);
   } else {
     return const TextStyle(); // Default TextStyle
@@ -263,6 +269,12 @@ ButtonStyle roundbuttonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(20),
   ),
+);
+
+BoxDecoration tooltipdecorationGradient = BoxDecoration(
+  borderRadius: BorderRadius.circular(25),
+  gradient:
+      const LinearGradient(colors: <Color>[AppColors.invite, AppColors.red]),
 );
 
 BoxDecoration tooltipdecoration = BoxDecoration(

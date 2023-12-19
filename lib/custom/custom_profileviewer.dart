@@ -84,8 +84,10 @@ class CustomProfileViewer extends StatelessWidget {
                         StackTrace? stackTrace) {
                       return Center(
                         child: Text(
-                          account.accountname.substring(0, 1) +
-                              account.lastname.substring(0, 1),
+                          account.lastname.isNotEmpty
+                              ? account.accountname.substring(0, 1) +
+                                  account.lastname.substring(0, 1)
+                              : account.accountname.substring(0, 2),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

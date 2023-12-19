@@ -1,7 +1,6 @@
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/providers/admin_provider.dart';
-import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/service/stripeservice.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +11,7 @@ class SubscriptionForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-
     final prvAdmin = Provider.of<AdminProvider>(context, listen: false);
-
-    // prvAdmin.createCheckOutSession(lProv.logedinUser.accountcode);
 
     return SizedBox(
       width: SizeConfig.screenWidth / 2,
@@ -89,22 +85,6 @@ class SubscriptionForm extends StatelessWidget {
                               await StripeService()
                                   .createCheckOutSession('Atr3434', '', '')
                             },
-                            /*  async {
-                              prvAdmin.createCustomer(lProv.logedinUser);
-                              await prvAdmin.createPaymentIntent();
-                              StripePaymentIntent obj =
-                                  prvAdmin.stripepaymentIntent!;
-                              /*  await Stripe.instance.initPaymentSheet(
-                                  paymentSheetParameters:
-                                      SetupPaymentSheetParameters(
-                                          paymentIntentClientSecret:
-                                              obj.clientSecret,
-                                          style: ThemeMode.dark,
-                                          merchantDisplayName:
-                                              "Alicorn Advisor"));
-                              await displayPaymentSheet(context); */
-                            } */
-                            /* => redirectToCheckout(context), */
                             child: const Text('Purchase'),
                           ),
                         ),

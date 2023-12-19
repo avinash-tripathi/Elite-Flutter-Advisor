@@ -5,16 +5,149 @@ import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/employerassistant.dart';
+import 'package:advisorapp/models/esign/anonymousesignentry.dart';
+import 'package:advisorapp/models/esign/anonymousmodel.dart';
+import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/models/visibilitystatus.dart';
+import 'package:advisorapp/service/esignservice.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
 import '../models/account.dart';
 import 'dart:html' as html;
 
 class RoomsProvider extends ChangeNotifier {
+  TextEditingController anonymousemailController = TextEditingController();
+  TextEditingController anonymousfirstnameController = TextEditingController();
+  TextEditingController anonymouslastnameController = TextEditingController();
+
+  late List<AnonymousEsignEntry> _anonymousEntries = [];
+  List<AnonymousEsignEntry> get anonymousEntries => _anonymousEntries;
+  bool _readingAnonymousEntries = false;
+  bool get readingAnonymousEntries => _readingAnonymousEntries;
+  set readingAnonymousEntries(bool obj) {
+    _readingAnonymousEntries = obj;
+    notifyListeners();
+  }
+
+  Future<void> readAnonymousEsignEntries(String accountcode) async {
+    try {
+      _readingAnonymousEntries = true;
+      _anonymousEntries.clear();
+      await EsignService()
+          .getAnonymousList(accountcode)
+          .then((value) => {_anonymousEntries = value!});
+      _readingAnonymousEntries = false;
+      notifyListeners();
+    } catch (e) {
+      _readingAnonymousEntries = false;
+    }
+  }
+
+  bool _newEsign = false;
+  bool get newEsign => _newEsign;
+
+  set newEsign(bool obj) {
+    _newEsign = obj;
+    notifyListeners();
+  }
+
+  bool _uploadingDocument = false;
+  bool get uploadingDocument => _uploadingDocument;
+
+  set uploadingDocument(bool obj) {
+    _uploadingDocument = obj;
+    notifyListeners();
+  }
+
+  /*  ESignEmbeddedResponse? _esignembededdata;
+  ESignEmbeddedResponse? get esignembededdata => _esignembededdata;
+  set esignembededdata(ESignEmbeddedResponse? obj) {
+    _esignembededdata = obj;
+    notifyListeners();
+  } */
+
+  /*  Future<ESignEmbeddedResponse> generateESignEmbeddedURL(
+      documentid, formdefinitionid) async {
+    _esignembededdata = await EsignService()
+        .generateESignEmbeddedURL(documentid, formdefinitionid);
+    return _esignembededdata!;
+    //notifyListeners();
+  } */
+  bool _viewIframe = false;
+  bool get viewIframe => _viewIframe;
+  set viewIframe(bool obj) {
+    _viewIframe = obj;
+    notifyListeners();
+  }
+
+  AnonymousModel? _anonymousUser;
+  AnonymousModel? get anonymousUser => _anonymousUser;
+  set anonymousUser(AnonymousModel? obj) {
+    _anonymousUser = obj;
+    notifyListeners();
+  }
+
+  Future<void> uploadAnonymousDocumentGenerateEmbedURL(
+      AnonymousModel obj) async {
+    try {
+      _uploadingDocument = true;
+      _anonymousUser =
+          await EsignService().uploadAnonymousDocumentGenerateEmbedURL(obj);
+      _uploadingDocument = false;
+
+      notifyListeners();
+    } catch (e) {
+      _uploadingDocument = false;
+    }
+  }
+
+  bool _startESign = false;
+  bool get startESign => _startESign;
+
+  set startESign(bool obj) {
+    _startESign = obj;
+    notifyListeners();
+  }
+
+  Future<void> startAnonESignatureProcess(AnonymousModel obj) async {
+    try {
+      _startESign = true;
+      _anonymousUser = await EsignService().startAnonESignatureProcess(obj);
+      _startESign = false;
+
+      notifyListeners();
+    } catch (e) {
+      _startESign = false;
+    }
+  }
+
+  Future<AnonymousModel> pickAnonymousUserFile(AnonymousModel obj) async {
+    final input = html.InputElement(type: 'file');
+    // MyFile objdummy = MyFile(name: '', base64: '', fileextension: '');
+    input.click();
+    await input.onChange.first;
+    if (input.files!.isNotEmpty) {
+      final file = input.files?.first;
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(file!);
+      await reader.onLoad.first;
+
+      final encoded = base64Encode(reader.result as List<int>);
+      //final fileext = ".${file.name.toString().split('.')[1]}";
+
+      obj.documentname = file.name;
+      obj.filebase64 = encoded;
+      obj.contentmimetype = file.type;
+      return obj;
+
+      /*   notifyListeners(); */
+    }
+    return obj;
+  }
+
   List<LaunchStatus> launchStatusList = [];
 
   Future<void> getLaunchStausList() async {
@@ -26,18 +159,23 @@ class RoomsProvider extends ChangeNotifier {
     launchStatusList
         .add(LaunchStatus(code: 'hold', name: 'On Hold', key: 'file'));
     launchStatusList
-        .add(LaunchStatus(code: 'Not sent', name: 'Not sent', key: 'file'));
+        .add(LaunchStatus(code: 'notsent', name: 'Not sent', key: 'file'));
+
+    launchStatusList
+        .add(LaunchStatus(code: 'none', name: 'Not sent', key: 'none'));
+    launchStatusList.add(
+        LaunchStatus(code: 'noneInProgress', name: 'In Progress', key: 'none'));
+    launchStatusList
+        .add(LaunchStatus(code: 'nonecomplete', name: 'Complete', key: 'none'));
+    launchStatusList
+        .add(LaunchStatus(code: 'nonehold', name: 'On Hold', key: 'none'));
 
     launchStatusList.add(LaunchStatus(
-        code: 'DocuSigntobesent', name: 'DocuSign to be sent', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignviewed', name: 'DocuSign viewed', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignexecuted', name: 'DocuSign executed', key: 'docsign'));
-    launchStatusList.add(LaunchStatus(
-        code: 'DocuSignexpired', name: 'DocuSign expired', key: 'docsign'));
-    launchStatusList
-        .add(LaunchStatus(code: 'Not sent', name: 'Not sent', key: 'docsign'));
+        code: 'esigninprogress', name: 'In Progress', key: 'esign'));
+    launchStatusList.add(
+        LaunchStatus(code: 'esigncanceled', name: 'Canceled', key: 'esign'));
+    launchStatusList.add(
+        LaunchStatus(code: 'esigncomplete', name: 'Complete', key: 'esign'));
     // notifyListeners();
   }
 
@@ -46,7 +184,8 @@ class RoomsProvider extends ChangeNotifier {
   Future<void> getAttachmentTypeList() async {
     attachmentTypeList.clear();
     attachmentTypeList.add(AttachmentType(code: 'file', name: 'File'));
-    attachmentTypeList.add(AttachmentType(code: 'docsign', name: 'DocSign'));
+    attachmentTypeList.add(AttachmentType(code: 'esign', name: 'eSign'));
+    attachmentTypeList.add(AttachmentType(code: 'none', name: 'None'));
 
     //notifyListeners();
   }
