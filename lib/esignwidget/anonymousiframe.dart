@@ -1,6 +1,7 @@
 import 'dart:html' as html;
 
 import 'package:advisorapp/constants.dart';
+import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class AnonymousIframe extends StatelessWidget {
   Widget build(BuildContext context) {
     // Register the view factory with a dynamic src
     final roomProvider = Provider.of<RoomsProvider>(context, listen: false);
+    final loginProvider = Provider.of<LoginProvider>(context, listen: false);
     ui.platformViewRegistry.registerViewFactory(
       'esignanonymousiframe',
       (int viewId) {
@@ -60,7 +62,11 @@ class AnonymousIframe extends StatelessWidget {
                                     .anonymousUser!.processid.isNotEmpty)
                                   {
                                     showSnackBar(
-                                        context, 'Successfully Sent for ESign')
+                                        context, 'Successfully Sent for ESign'),
+                                    roomProvider.readAnonymousEsignEntries(
+                                        loginProvider.logedinUser.accountcode),
+                                    roomProvider.viewIframe = false,
+                                    roomProvider.newEsign = false
                                   }
                                 else
                                   {
@@ -77,6 +83,8 @@ class AnonymousIframe extends StatelessWidget {
         IconButton(
             onPressed: () {
               Provider.of<RoomsProvider>(context, listen: false).viewIframe =
+                  false;
+              Provider.of<RoomsProvider>(context, listen: false).newEsign =
                   false;
             },
             icon: const Icon(

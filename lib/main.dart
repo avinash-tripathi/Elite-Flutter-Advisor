@@ -14,12 +14,13 @@ import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/providers/sidebar_provider.dart';
 import 'package:advisorapp/route/route_generator.dart';
 import 'package:advisorapp/style/colors.dart';
+
 import 'package:flutter/material.dart';
 
 //import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:advisorapp/config/dev.dart'
-    if (dart.library.io) 'package:advisorapp/config/prod.dart';
+import 'package:advisorapp/config/prod.dart'
+    if (dart.library.html) 'package:advisorapp/config/dev.dart';
 
 //final navigatorKey = GlobalKey<NavigatorState>();
 void main() {
@@ -95,6 +96,7 @@ class MyAppState extends State<MyApp> {
       Provider.of<IdeaProvider>(context, listen: false).getIdeas(),
       Provider.of<IdeaProvider>(context, listen: false).getVotes(),
       Provider.of<AdminProvider>(context, listen: false).getsubscriptions(),
+      Provider.of<AdminProvider>(context, listen: false).readAdminUsers(),
     ]);
 
     // Data loading completed, update the loading state
@@ -124,16 +126,24 @@ class MyAppState extends State<MyApp> {
       initialRoute: "/",
       navigatorKey: microsoftProv.navigatorKeyMicrosoftAuth,
       onGenerateRoute: RouteGenerator.generateRoute,
-      title: 'Advisor App',
+      title: 'Advisor',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: AppColors.white,
         fontFamily: 'Poppins',
+        textTheme: const TextTheme(
+          bodySmall: TextStyle(
+              fontFamily: 'Poppins', // Replace with your default font
+              fontSize: 12.0,
+              fontWeight:
+                  FontWeight.normal // Replace with your default font size
+              ),
+        ),
         tooltipTheme: TooltipThemeData(
           textStyle: const TextStyle(
             color: Colors.white,
             fontSize: 12.0,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.normal,
           ),
           decoration: BoxDecoration(
             color: Colors.blue,

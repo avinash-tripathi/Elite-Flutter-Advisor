@@ -56,9 +56,6 @@ class AddAnonymous extends StatelessWidget {
                             if (!isEmailValid(value)) {
                               return 'Invalid Email Format.';
                             }
-                            if (checkProhibitedEmailDomain(value) == true) {
-                              return 'Email With Domain: ${value.split('@')[1]} Is Not Allowed.';
-                            }
 
                             return null;
                           },
@@ -159,6 +156,15 @@ class AddAnonymous extends StatelessWidget {
                                                   Provider.of<LoginProvider>(
                                                       context,
                                                       listen: false);
+                                              bool consent = await EliteDialog(
+                                                  context,
+                                                  "Please Confirm?",
+                                                  "Please note that once the document is sent for eSign,the sender or the receiver won’t be able to change signatories.If signatories need to be changed, you can send a new document for eSign.",
+                                                  "Yes",
+                                                  "No");
+                                              if (!consent) {
+                                                return;
+                                              }
 
                                               AnonymousModel obj =
                                                   AnonymousModel();

@@ -31,6 +31,12 @@ class EmployerProvider extends ChangeNotifier {
   TextEditingController daytodaycontactController = TextEditingController();
   TextEditingController planeffectivedateController = TextEditingController();
 
+  Future<void> removeLaunchPack(index) async {
+    _actionlaunchpacks.removeAt(index);
+    newActionItem = false;
+    notifyListeners();
+  }
+
   Future<void> sendAssignmentEmail(NewActionItemMail obj) async {
     try {
       await HttpService().sendEmailForNewActionItem(obj);
@@ -497,12 +503,20 @@ class EmployerProvider extends ChangeNotifier {
   Future<void> generateESignEmbeddedURL(documentid, formdefinitionid) async {
     _esignembededdata = await HttpService()
         .generateESignEmbeddedURL(documentid, formdefinitionid);
-    // return _esignembededdata!;
+
+    notifyListeners();
+  }
+
+  bool _newActionItem = false;
+  bool get newActionItem => _newActionItem;
+  set newActionItem(bool obj) {
+    _newActionItem = obj;
     notifyListeners();
   }
 
   Future<void> addActionLaunchPack() async {
     _actionlaunchpacks.clear();
+    _newActionItem = true;
     _actionlaunchpacks.add(ActionLaunchPack(
         filebase64: '',
         fileextension: '',
@@ -513,17 +527,13 @@ class EmployerProvider extends ChangeNotifier {
         esigndocumentdata:
             ESignDocument(esigndocumentid: '', formdefinitionid: ''),
         newAction: true));
-
-    /* if (_actionlaunchpacks.isEmpty) {
-      
-    } */
-
     notifyListeners();
   }
 
   Future<void> saveActionLaunchPack(AccountAction obj, int index) async {
     try {
       savingLaunchPack = true;
+
       await HttpService().addAction(obj).then((value) {
         ActionLaunchPack? retObj = value?.formfileupload[0];
         _actionlaunchpacks[index].filebase64 = retObj!.filebase64;
@@ -580,17 +590,24 @@ class EmployerProvider extends ChangeNotifier {
   set selectedFromAssist(EmployerAssist? obj) {
     _selectedFromAssist = obj;
     if (_selectedToAssist != null &&
-        (_selectedToAssist!.account == _selectedFromAssist!.account)) {
+        (_selectedToAssist!.account.accountcode ==
+            _selectedFromAssist!.account.accountcode)) {
       _selectedVisibilityStatus = true;
+      _toDotooltip =
+          "If you uncheck Private, then the item will be visible to other users within your company";
     } else {
       _selectedVisibilityStatus = false;
     }
     if (_selectedToAssist != null &&
         _selectedToAssist!.account.companydomainname ==
-            _selectedFromAssist!.account.companydomainname) {
+            _selectedFromAssist!.account.companydomainname &&
+        (_selectedToAssist!.account.accountcode !=
+            _selectedFromAssist!.account.accountcode)) {
       _toDotooltip =
           "Private items will be visible only to the Sender and Receiver within your company";
-    } else {
+    } else if (_selectedToAssist != null &&
+        _selectedToAssist!.account.companydomainname !=
+            _selectedFromAssist!.account.companydomainname) {
       _toDotooltip =
           "Private items will be visible only to the Sender, Receiver and the Advisor";
     }
@@ -610,17 +627,24 @@ class EmployerProvider extends ChangeNotifier {
   set selectedToAssist(EmployerAssist? obj) {
     _selectedToAssist = obj;
     if (_selectedFromAssist != null &&
-        (_selectedToAssist!.account == _selectedFromAssist!.account)) {
+        (_selectedToAssist!.account.accountcode ==
+            _selectedFromAssist!.account.accountcode)) {
       _selectedVisibilityStatus = true;
+      _toDotooltip =
+          "If you uncheck Private, then the item will be visible to other users within your company";
     } else {
       _selectedVisibilityStatus = false;
     }
     if (_selectedFromAssist != null &&
         _selectedToAssist!.account.companydomainname ==
-            _selectedFromAssist!.account.companydomainname) {
+            _selectedFromAssist!.account.companydomainname &&
+        (_selectedToAssist!.account.accountcode !=
+            _selectedFromAssist!.account.accountcode)) {
       _toDotooltip =
           "Private items will be visible only to the Sender and Receiver within your company";
-    } else {
+    } else if (_selectedFromAssist != null &&
+        _selectedToAssist!.account.companydomainname !=
+            _selectedFromAssist!.account.companydomainname) {
       _toDotooltip =
           "Private items will be visible only to the Sender, Receiver and the Advisor";
     }
@@ -695,8 +719,9 @@ class EmployerProvider extends ChangeNotifier {
 
   Future<void> getLaunchStatusList() async {
     launchStatusList.clear();
+
     launchStatusList.add(
-        LaunchStatus(code: 'InProgress', name: 'In Progress', key: 'file'));
+        LaunchStatus(code: 'inprogress', name: 'In Progress', key: 'file'));
     launchStatusList
         .add(LaunchStatus(code: 'complete', name: 'Complete', key: 'file'));
     launchStatusList
@@ -707,11 +732,14 @@ class EmployerProvider extends ChangeNotifier {
     launchStatusList
         .add(LaunchStatus(code: 'none', name: 'Not sent', key: 'none'));
     launchStatusList.add(
-        LaunchStatus(code: 'noneInProgress', name: 'In Progress', key: 'none'));
+        LaunchStatus(code: 'noneinprogress', name: 'In Progress', key: 'none'));
     launchStatusList
         .add(LaunchStatus(code: 'nonecomplete', name: 'Complete', key: 'none'));
     launchStatusList
         .add(LaunchStatus(code: 'nonehold', name: 'On Hold', key: 'none'));
+
+    launchStatusList.add(
+        LaunchStatus(code: 'esignnotsent', name: 'Not sent', key: 'esign'));
 
     launchStatusList.add(LaunchStatus(
         code: 'esigninprogress', name: 'In Progress', key: 'esign'));
@@ -719,6 +747,8 @@ class EmployerProvider extends ChangeNotifier {
         LaunchStatus(code: 'esigncanceled', name: 'Canceled', key: 'esign'));
     launchStatusList.add(
         LaunchStatus(code: 'esigncomplete', name: 'Complete', key: 'esign'));
+    launchStatusList
+        .add(LaunchStatus(code: 'esignexpired', name: 'Expired', key: 'esign'));
     notifyListeners();
   }
 

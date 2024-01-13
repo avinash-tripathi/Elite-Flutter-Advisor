@@ -4,7 +4,7 @@ import 'package:advisorapp/config/responsive.dart';
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/custom/custom_logoviewerpartner.dart';
 import 'package:advisorapp/custom/custom_tooltippartner.dart';
-import 'package:advisorapp/forms/partner/partnerentry.dart';
+
 import 'package:advisorapp/forms/partner/sl_partnerentry.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
 import 'package:advisorapp/providers/login_provider.dart';

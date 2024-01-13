@@ -1,4 +1,7 @@
+import 'dart:js_interop';
+
 import 'package:advisorapp/models/account.dart';
+import 'package:advisorapp/models/admin/adminuser.dart';
 import 'package:advisorapp/models/admin/paymentmethod/attachedpaymentmethod.dart';
 import 'package:advisorapp/models/admin/paymentmethod/invoice.dart';
 import 'package:advisorapp/models/admin/setupIntent/inputsetupintent.dart';
@@ -14,6 +17,21 @@ import 'package:flutter/material.dart';
 import 'package:advisorapp/models/role.dart';
 
 class AdminProvider extends ChangeNotifier {
+  bool readingAdminuser = false;
+  List<AdminUser> _adminusers = [];
+  List<AdminUser> get adminusers => _adminusers;
+  Future<void> readAdminUsers() async {
+    try {
+      readingAdminuser = true;
+      _adminusers = await AdminService().readAdminUsers();
+      readingAdminuser = false;
+
+      notifyListeners();
+    } catch (e) {
+      readingAdminuser = true;
+    }
+  }
+
   bool _viewIframe = false;
   bool get viewIframe => _viewIframe;
 
@@ -24,11 +42,12 @@ class AdminProvider extends ChangeNotifier {
 
   bool _updatestatus = false;
 
-  Future<void> updateStatus(accountcode, userstatus) async {
+  Future<void> updateStatus(
+      Account accountowner, Account account, userstatus) async {
     try {
       _updatestatus = true;
 
-      await AdminService().updateStatus(accountcode, userstatus);
+      await AdminService().updateStatus(accountowner, account, userstatus);
       _updatestatus = false;
 
       notifyListeners();
@@ -83,6 +102,10 @@ class AdminProvider extends ChangeNotifier {
       _attachedpaymentmethod =
           await AdminService().readAttachedPaymentMethod(accountcode);
       readingPaymentMethod = false;
+      (_attachedpaymentmethod?.paymentmethoddata != null)
+          ? _validpaymentmethodexist = true
+          : _validpaymentmethodexist = false;
+
       notifyListeners();
     } catch (e) {
       readingPaymentMethod = false;
@@ -104,20 +127,28 @@ class AdminProvider extends ChangeNotifier {
     }
   }
 
-  bool deletePaymentMethod = false;
+  bool _deletePaymentMethod = false;
+
+  bool get deletePaymentMethod => _deletePaymentMethod;
+  set deletePaymentMethod(bool obj) {
+    _deletePaymentMethod = obj;
+    notifyListeners();
+  }
+
   dynamic _deletePaymentMethodResponse;
   dynamic get deletePaymentMethodResponse => _deletePaymentMethodResponse;
 
   Future<void> deleteAttachedPaymentMethod(accountcode, paymentmethodid) async {
     try {
-      deletePaymentMethod = true;
+      _deletePaymentMethod = true;
       _deletePaymentMethodResponse = await AdminService()
           .deleteAttachedPaymentMethod(accountcode, paymentmethodid);
-      deletePaymentMethod = false;
+      _deletePaymentMethod = false;
       _attachedpaymentmethod?.paymentmethoddata = null;
+      _validpaymentmethodexist = false;
       notifyListeners();
     } catch (e) {
-      deletePaymentMethod = false;
+      _deletePaymentMethod = false;
     }
   }
 
@@ -169,6 +200,20 @@ class AdminProvider extends ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  bool _validpaymentmethodexist = false;
+  bool get validpaymentmethodexist => _validpaymentmethodexist;
+  set validpaymentmethodexist(bool obj) {
+    _validpaymentmethodexist = obj;
+    notifyListeners();
+  }
+
+  Invoice? _invoicetoprint;
+  Invoice get invoicetoprint => _invoicetoprint!;
+  set invoicetoprint(Invoice obj) {
+    _invoicetoprint = obj;
+    notifyListeners();
   }
 
   StripeSession? _checkoutsession;

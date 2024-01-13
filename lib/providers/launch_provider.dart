@@ -171,6 +171,18 @@ class LaunchProvider extends ChangeNotifier {
           formfileupload: selectedLaunchPacks!);
       AccountAction returnObject = (await HttpService().addAction(objL))!;
 
+      ActionLaunchPack? retObj = returnObject.formfileupload[0];
+      _launchpacks[index].filebase64 = retObj.filebase64;
+
+      _launchpacks[index].filename = retObj.filename;
+      _launchpacks[index].formcode = retObj.formcode;
+      _launchpacks[index].formname = retObj.formname;
+      _launchpacks[index].fileextension = retObj.fileextension;
+      _launchpacks[index].launchpack = retObj.launchpack;
+      _launchpacks[index].renewalpack = retObj.renewalpack;
+      _launchpacks[index].attachmenttype = retObj.attachmenttype;
+      _launchpacks[index].esigndocumentdata = retObj.esigndocumentdata;
+
       _savedAccountAction = returnObject;
       setaccountActionSaved(index, false);
       //_newAction = false;
@@ -208,6 +220,7 @@ class LaunchProvider extends ChangeNotifier {
 
   Future<void> readLaunchPack(accountcode, employercode) async {
     _launchpacks.clear();
+    _accountActionIndexSaved.clear();
     try {
       reading = true;
       await HttpService()

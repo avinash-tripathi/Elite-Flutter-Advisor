@@ -1,10 +1,17 @@
 class AppConfig {
-  static const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
-  static const String microsoftClientId = '1087cdb1-0c33-4e7f-9c79-24d674d0165f';
+  static const String webApiserviceURL =
+      "https://advisorwebapiprod.azurewebsites.net/api/";
+  static const String microsoftClientId =
+      'c037b070-beca-4c16-8850-4a6694ddd2ea';
   static const String microsoftAuthredirectUri = 'https://advisor.alicorn.co/';
+
+  static const String basePathOfLogo =
+      'https://advisorprodstorage.blob.core.windows.net/advisorimages/employerlogo/';
+  static const String defaultimagePath =
+      'https://advisorprodstorage.blob.core.windows.net/advisorimages/employerlogo/default.png';
   static const String defaultActionItemPath =
-      'https://advisorformsftp.blob.core.windows.net/advisorform/';
+      'https://advisorprodstorage.blob.core.windows.net/advisorform/';
 
   static const String defaultIdeaPath =
-      'https://advisorformsftp.blob.core.windows.net/advisorideas/';
+      'https://advisorprodstorage.blob.core.windows.net/advisorideas/';
 }

@@ -70,7 +70,7 @@ class HttpService {
     try {
       String? value = "";
       await getLoggedInCredential().then((loggedIn) {
-        value = loggedIn.accountname;
+        value = '${loggedIn.accountname} ${loggedIn.lastname}';
         return value;
       });
       return value;

@@ -5,6 +5,7 @@ import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/custom/custom_profileviewer.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
+import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/role.dart';
 import 'package:advisorapp/models/status.dart';
 import 'package:advisorapp/providers/admin_provider.dart';
@@ -27,6 +28,14 @@ class MySubscription extends StatelessWidget {
     final adminProvider = Provider.of<AdminProvider>(context, listen: false);
     final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
     adminProvider.readSubscriptionLicense(lgnProvider.logedinUser.accountcode);
+    final mstProvider = Provider.of<MasterProvider>(context, listen: false);
+    CompanyCategory objCate = mstProvider.companycategories[0];
+    if (mstProvider.companycategories.isNotEmpty &&
+        lgnProvider.logedinUser.companycategory.isNotEmpty) {
+      objCate = mstProvider.companycategories.firstWhere((element) =>
+          element.categorycode == lgnProvider.logedinUser.companycategory);
+    }
+
     return Scaffold(
         key: scaffoldKey,
         body: Background(
@@ -288,20 +297,36 @@ class MySubscription extends StatelessWidget {
                                                               .toSet()
                                                               .toList(),
                                                         )),
-                                                        const DataCell(
-                                                          Text(
-                                                            "\$99 per month",
-                                                            style: appstyle,
-                                                          ),
+                                                        DataCell(
+                                                          (objCate.categoryname !=
+                                                                  "Employer")
+                                                              ? const Text(
+                                                                  "\$99 per month",
+                                                                  style:
+                                                                      appstyle,
+                                                                )
+                                                              : const Text(
+                                                                  "\$0 per month",
+                                                                  style:
+                                                                      appstyle,
+                                                                ),
                                                         ),
                                                         DataCell(
-                                                          Text(
-                                                            (prvAdmin
-                                                                .subscriptionLicenses[
-                                                                    i]
-                                                                .nextrechargedate),
-                                                            style: appstyle,
-                                                          ),
+                                                          (objCate.categoryname !=
+                                                                  "Employer")
+                                                              ? Text(
+                                                                  (prvAdmin
+                                                                      .subscriptionLicenses[
+                                                                          i]
+                                                                      .nextrechargedate),
+                                                                  style:
+                                                                      appstyle,
+                                                                )
+                                                              : const Text(
+                                                                  "NA",
+                                                                  style:
+                                                                      appstyle,
+                                                                ),
                                                         ),
                                                         DataCell(
                                                           Text(
@@ -354,7 +379,11 @@ class MySubscription extends StatelessWidget {
                                                                     prvAdmin
                                                                         .subscriptionLicenses[
                                                                             i]
-                                                                        .accountcode,
+                                                                        .accountownerdata,
+                                                                    prvAdmin
+                                                                        .subscriptionLicenses[
+                                                                            i]
+                                                                        .accountdata,
                                                                     newValue
                                                                         .code);
                                                               }

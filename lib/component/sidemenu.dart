@@ -39,7 +39,11 @@ class SideMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final sideProvider = Provider.of<SidebarProvider>(context, listen: false);
 
+    final adminProv = Provider.of<AdminProvider>(context, listen: false);
     final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
+    final bool issuperadmin = adminProv.adminusers
+        .any((user) => user.emailid == lgnProvider.logedinUser.workemail);
+
     final mstProvider = Provider.of<MasterProvider>(context, listen: false);
     CompanyCategory objCate = mstProvider.companycategories[0];
     if (mstProvider.companycategories.isNotEmpty &&
@@ -56,9 +60,14 @@ class SideMenu extends StatelessWidget {
         (paymentcode == 'PC-20230423165346513') ? false : false;
 
     bool validLicense = lgnProvider.logedinUser.validlicense;
+    bool validPaymentMethod = lgnProvider.logedinUser.validpaymentmethodexist;
+    if (objCate.categoryname == 'Employer') {
+      validPaymentMethod = true;
+      validLicense = true;
+    }
     bool isAccountOwner =
         (lgnProvider.logedinUser.accountrole == 'RL-20230224175000800');
-    final adminProv = Provider.of<AdminProvider>(context, listen: false);
+
     adminProv.readAttachedPaymentMethod(lgnProvider.logedinUser.accountcode);
 
     return SizedBox(
@@ -85,21 +94,8 @@ class SideMenu extends StatelessWidget {
                       children: const [],
                     ),
                   ),
-                  /*  Container(
-                    color: Colors.transparent,
-                    child: ListTile(
-                      leading: GoogleUserCircleAvatar(
-                        identity: lgnProvider.currentGoogleUser!,
-                      ),
-                      title: Text(
-                          lgnProvider.currentGoogleUser!.displayName ?? '',
-                          style: sideGoogleStyle),
-                      /*    subtitle: Text(lgnProvider.currentGoogleUser!.email,
-                          style: sideMenuStyle), */
-                    ),
-                  ), */
                   Visibility(
-                    visible: (restricttoAccount == false),
+                    visible: ((restricttoAccount == false) && !issuperadmin),
                     child: Container(
                       decoration: BoxDecoration(
                           color: (menuProvider.selectedMenu == 'Home')
@@ -121,16 +117,30 @@ class SideMenu extends StatelessWidget {
                             ? null
                             : () {
                                 sideProvider.selectedMenu = 'Home';
+
+                                final prvRoom = Provider.of<RoomsProvider>(
+                                    context,
+                                    listen: false);
+
+                                prvRoom.getInitialLaunchPack(
+                                    lgnProvider.logedinUser.accountcode,
+                                    '',
+                                    'Individual');
+                                prvRoom.readRooms(
+                                    lgnProvider.logedinUser.workemail);
+                                prvRoom.actionItemText = "My Action Items";
+
                                 Navigator.pushNamed(context, "/Home");
                               },
                       ),
                     ),
                   ),
                   Visibility(
-                    visible: (lgnProvider.logedinUser.mandatorycolumnfilled ==
-                            'YES' &&
-                        objCate.categoryname == 'Advisor' &&
-                        restricttoAccount == false),
+                    visible: ((lgnProvider.logedinUser.mandatorycolumnfilled ==
+                                'YES' &&
+                            objCate.categoryname == 'Advisor' &&
+                            restricttoAccount == false) &&
+                        !issuperadmin),
                     child: Container(
                       decoration: BoxDecoration(
                           color: (menuProvider.selectedMenu == 'Employer')
@@ -165,10 +175,11 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   Visibility(
-                    visible: (lgnProvider.logedinUser.mandatorycolumnfilled ==
-                            'YES' &&
-                        objCate.categoryname == 'Advisor' &&
-                        restricttoAccount == false),
+                    visible: ((lgnProvider.logedinUser.mandatorycolumnfilled ==
+                                'YES' &&
+                            objCate.categoryname == 'Advisor' &&
+                            restricttoAccount == false) &&
+                        !issuperadmin),
                     child: Container(
                       decoration: BoxDecoration(
                           color: (menuProvider.selectedMenu == 'Partner')
@@ -228,11 +239,12 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   Visibility(
-                    visible: (lgnProvider.logedinUser.mandatorycolumnfilled ==
-                                'YES' &&
-                            restricttoAccount == false &&
-                            (objCate.categoryname == 'Advisor') ||
-                        objCate.categoryname == 'Partner'),
+                    visible: ((lgnProvider.logedinUser.mandatorycolumnfilled ==
+                                    'YES' &&
+                                restricttoAccount == false &&
+                                (objCate.categoryname == 'Advisor') ||
+                            objCate.categoryname == 'Partner') ||
+                        issuperadmin),
                     child: Container(
                       decoration: BoxDecoration(
                           color: (menuProvider.selectedMenu == 'Invite')
@@ -261,7 +273,7 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   Visibility(
-                    visible: true,
+                    visible: true && !issuperadmin,
                     child: Container(
                       decoration: BoxDecoration(
                           color: (menuProvider.selectedMenu == 'Contracts')
@@ -273,7 +285,7 @@ class SideMenu extends StatelessWidget {
                           width: 20,
                           child: SvgPicture.asset(
                             'assets/contract.svg',
-                            //color: AppColors.iconGray,
+                            color: AppColors.iconGray,
                           ),
                         ),
                         title: const Text(
@@ -316,12 +328,12 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   Visibility(
-                    visible: isAccountOwner &&
-                        objCate.basecategorycode != 'employer',
+                    visible: validLicense && isAccountOwner && !issuperadmin,
                     child: ExpansionTile(
                       initiallyExpanded:
                           (menuProvider.selectedMenu == 'Subscription' ||
-                                  menuProvider.selectedMenu == 'Billing')
+                                  menuProvider.selectedMenu == 'Billing' ||
+                                  menuProvider.selectedMenu == 'Invoices')
                               ? true
                               : false,
                       leading: SizedBox(
@@ -351,52 +363,84 @@ class SideMenu extends StatelessWidget {
                             },
                           ),
                         ),
-                        Consumer<AdminProvider>(
-                            builder: (context, admProvider, child) {
-                          return Container(
-                            decoration: BoxDecoration(
-                                color: (menuProvider.selectedMenu == 'Billing')
-                                    ? const Color.fromARGB(255, 234, 231, 231)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(30.0)),
-                            child: ListTile(
-                              title: const Text('Payment methods',
-                                  textAlign: TextAlign.right,
-                                  style: sideMenuAdminStyle),
-                              onTap: () {
-                                sideProvider.selectedMenu = 'Billing';
-                                Account objA = lgnProvider.logedinUser;
+                        Visibility(
+                          visible: isAccountOwner &&
+                              objCate.basecategorycode != 'employer',
+                          child: Consumer<AdminProvider>(
+                              builder: (context, admProvider, child) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: (menuProvider.selectedMenu ==
+                                          'Billing')
+                                      ? const Color.fromARGB(255, 234, 231, 231)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(30.0)),
+                              child: ListTile(
+                                title: const Text('Payment methods',
+                                    textAlign: TextAlign.right,
+                                    style: sideMenuAdminStyle),
+                                onTap: () {
+                                  sideProvider.selectedMenu = 'Billing';
+                                  Account objA = lgnProvider.logedinUser;
 
-                                var obj = InputSetupIntent(
-                                    customerid: '',
-                                    name: objA.accountname + objA.lastname,
-                                    email: objA.workemail,
-                                    description: "Payment for Advisor",
-                                    metadata: {
-                                      "accountcode": objA.accountcode
-                                    });
+                                  var obj = InputSetupIntent(
+                                      customerid: '',
+                                      name:
+                                          '${objA.accountname} ${objA.lastname}',
+                                      email: objA.workemail,
+                                      description: "Payment for Advisor",
+                                      metadata: {
+                                        "accountcode": objA.accountcode
+                                      });
 
-                                if (admProvider.attachedpaymentmethod == null) {
-                                  admProvider
-                                      .createSetupIntentCheckOutSession(obj);
-                                } else if (admProvider
-                                            .attachedpaymentmethod !=
-                                        null &&
-                                    admProvider.attachedpaymentmethod!
-                                        .paymentmethoddata.isNull &&
-                                    admProvider.setupintentUrl.isEmpty) {
-                                  obj.customerid = admProvider
-                                      .attachedpaymentmethod!.customerdata.id;
-                                  admProvider
-                                      .createSetupIntentCheckOutSession(obj);
-                                }
+                                  if (admProvider.attachedpaymentmethod ==
+                                      null) {
+                                    admProvider
+                                        .createSetupIntentCheckOutSession(obj);
+                                  } else if (admProvider
+                                              .attachedpaymentmethod !=
+                                          null &&
+                                      admProvider.attachedpaymentmethod!
+                                          .paymentmethoddata.isNull &&
+                                      admProvider.setupintentUrl.isEmpty) {
+                                    obj.customerid = admProvider
+                                        .attachedpaymentmethod!.customerdata.id;
+                                    admProvider
+                                        .createSetupIntentCheckOutSession(obj);
+                                  }
 
-                                Navigator.pushReplacementNamed(
-                                    context, '/Billing');
-                              },
-                            ),
-                          );
-                        })
+                                  Navigator.pushReplacementNamed(
+                                      context, '/Billing');
+                                },
+                              ),
+                            );
+                          }),
+                        ),
+                        Visibility(
+                          visible: isAccountOwner &&
+                              objCate.basecategorycode != 'employer',
+                          child: Consumer<AdminProvider>(
+                              builder: (context, admProvider, child) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: (menuProvider.selectedMenu ==
+                                          'Invoices')
+                                      ? const Color.fromARGB(255, 234, 231, 231)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(30.0)),
+                              child: ListTile(
+                                title: const Text('Invoices',
+                                    textAlign: TextAlign.right,
+                                    style: sideMenuAdminStyle),
+                                onTap: () {
+                                  sideProvider.selectedMenu = 'Invoices';
+                                  Navigator.pushReplacementNamed(
+                                      context, '/Invoices');
+                                },
+                              ),
+                            );
+                          }),
+                        )
                       ],
                     ),
                   ),
@@ -490,21 +534,30 @@ class SideMenu extends StatelessWidget {
                   ),
                 ),
               ),
-              !validLicense
-                  ? Align(
-                      alignment: Alignment(0, .6),
-                      child: ListTile(
-                        title: Text(
-                          'Alert!',
-                          style: TextStyle(color: AppColors.red),
-                        ),
-                        subtitle: Text(
-                          'Subscription is not active or has expired! Please contact your account owner.\nPayment method needs to be on file for an active subscription.',
-                          style: TextStyle(fontSize: 10),
-                        ),
-                      ),
-                    )
-                  : Text(''),
+              Consumer<AdminProvider>(builder: (context, admProvider, child) {
+                if (objCate.categoryname != 'Employer' && isAccountOwner) {
+                  validPaymentMethod = admProvider.validpaymentmethodexist;
+                  lgnProvider.logedinUser.validpaymentmethodexist =
+                      validPaymentMethod;
+                }
+                return issuperadmin
+                    ? Text('')
+                    : ((!validLicense || !validPaymentMethod))
+                        ? Align(
+                            alignment: Alignment(0, .6),
+                            child: ListTile(
+                              title: Text(
+                                'Alert!',
+                                style: TextStyle(color: AppColors.red),
+                              ),
+                              subtitle: Text(
+                                'Subscription is not active or has expired! Please contact your account owner.\nPayment method needs to be on file for an active subscription.\nPayment method can be added by the account owner in the Admin section.',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          )
+                        : Text('');
+              }),
               const Align(
                 alignment: Alignment(0, 1),
                 child: ListTile(
@@ -551,10 +604,10 @@ class SideMenu extends StatelessWidget {
 
     Provider.of<IdeaProvider>(context, listen: false).ideas.clear();
     Provider.of<IdeaProvider>(context, listen: false).votes.clear();
-    Provider.of<LaunchProvider>(context, listen: false)
+    /*   Provider.of<LaunchProvider>(context, listen: false)
         .attachmentTypeList
-        .clear();
-    Provider.of<LaunchProvider>(context, listen: false).itemStatusList.clear();
+        .clear(); */
+    /*  Provider.of<LaunchProvider>(context, listen: false).itemStatusList.clear(); */
     Provider.of<LaunchProvider>(context, listen: false).launchpacks.clear();
 
     Provider.of<PartnerProvider>(context, listen: false).partners.clear();

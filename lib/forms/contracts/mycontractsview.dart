@@ -6,12 +6,11 @@ import 'package:advisorapp/forms/contracts/addanonymous.dart';
 import 'package:advisorapp/models/account.dart';
 import 'package:advisorapp/models/employer.dart';
 import 'package:advisorapp/models/launchpack.dart';
-import 'package:advisorapp/models/launchstatus.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,6 +24,9 @@ class MyContractsView extends StatelessWidget {
     final prvRoom = Provider.of<RoomsProvider>(context, listen: false);
     prvRoom.clearActionLaunchPack();
     prvRoom.readAnonymousEsignEntries(loginProvider.logedinUser.accountcode);
+    prvRoom.getInitialLaunchPack(
+        loginProvider.logedinUser.accountcode, '', 'Individual');
+    prvRoom.readRooms(loginProvider.logedinUser.workemail);
 
     return SizedBox(
         width: SizeConfig.screenWidth,
@@ -46,9 +48,15 @@ class MyContractsView extends StatelessWidget {
                           onPressed: () {
                             prvAddEsign.newEsign = true;
                           },
-                          child: const Text(
-                            '+ Send for eSign',
-                            style: appstyle,
+                          child: Tooltip(
+                            textStyle: const TextStyle(
+                              color: AppColors.black,
+                            ),
+                            decoration: tooltipdecoration,
+                            message:
+                                "If the eSign is for a user of the advisor platform,\nplease send it from the employer workspace.\nIf the eSign is for someone that is NOT a user \nof the advisor platform, you can send it here.",
+                            child: const Text('+ Send for eSign',
+                                style: appstyle, textAlign: TextAlign.justify),
                           ));
                     }),
                     IconButton(
@@ -76,481 +84,554 @@ class MyContractsView extends StatelessWidget {
                             : SingleChildScrollView(
                                 child: prvView.newEsign
                                     ? const AddAnonymous()
-                                    : DataTable(columnSpacing: 15, columns: [
-                                        DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 25,
-                                          child: const Text('From'),
-                                        )),
-                                        DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 25,
-                                          child: const Padding(
-                                            padding: EdgeInsets.only(left: 10),
-                                            child: Text('To'),
+                                    : Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            "Documents sent to users of the advisor platform",
+                                            style: appstyle,
                                           ),
-                                        )),
-                                        DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 6,
-                                          child: const Center(
-                                              child: Text('Document')),
-                                        )),
-                                        DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 10,
-                                          child: const Center(
-                                              child: Text('Due Date')),
-                                        )),
-                                        /*  DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 8,
-                                          child: const Center(
-                                              child: Text('Status')),
-                                        )), */
-                                        DataColumn(
-                                            label: SizedBox(
-                                          width: SizeConfig.screenWidth / 8,
-                                          child: const Center(
-                                              child: Text('Status')),
-                                        )),
-                                      ], rows: [
-                                        for (var i = 0;
-                                            i < prvView.launchpacks.length;
-                                            i++)
-                                          if ((prvView.launchpacks[i]
-                                                          .visibility ==
-                                                      'public' ||
-                                                  (prvView.launchpacks[i]
-                                                              .visibility ==
-                                                          'private' &&
-                                                      (prvView.launchpacks[i]
-                                                                  .fromcode ==
-                                                              loginProvider
-                                                                  .logedinUser
-                                                                  .accountcode ||
-                                                          prvView.launchpacks[i]
-                                                                  .tocode ==
-                                                              loginProvider
-                                                                  .logedinUser
-                                                                  .accountcode))) &&
-                                              prvView.launchpacks[i]
-                                                      .attachmenttype ==
-                                                  'esign')
-                                            DataRow.byIndex(index: i, cells: [
-                                              DataCell(
-                                                Row(
-                                                  children: [
-                                                    CustomProfileViewer(
-                                                        account: prvView
-                                                                .launchpacks[i]
-                                                                .fromcodedata ??
-                                                            Account(
-                                                                rolewithemployer: [])),
-                                                  ],
-                                                ),
-                                              ),
-                                              DataCell(
-                                                Row(
-                                                  children: [
-                                                    CustomProfileViewer(
-                                                        account: prvView
-                                                                .launchpacks[i]
-                                                                .tocodedata ??
-                                                            Account(
-                                                                rolewithemployer: [])),
-                                                  ],
-                                                ),
-                                              ),
-                                              DataCell(
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      Uri uri = Uri.parse(
-                                                          "$defaultActionItemPath${prvView.launchpacks[i].formcode}/${prvView.launchpacks[i].formcodewithextension}");
-                                                      if (prvView
-                                                          .launchpacks[i]
-                                                          .formcodewithextension
-                                                          .isNotEmpty) {
-                                                        if (await canLaunchUrl(
-                                                            uri)) {
-                                                          await launchUrl(uri);
-                                                        }
-                                                      } else {
-                                                        // Handle error when unable to launch the URL
-                                                      }
-                                                    },
-                                                    child: Center(
-                                                      child: Tooltip(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(25),
-                                                          gradient:
-                                                              const LinearGradient(
-                                                                  colors: <Color>[
-                                                                AppColors
-                                                                    .invite,
-                                                                AppColors.red
-                                                              ]),
-                                                        ),
-                                                        message: prvView
-                                                            .launchpacks[i]
-                                                            .actionitemdata
-                                                            ?.filename,
-                                                        child: Text(
-                                                          prvView.launchpacks[i]
-                                                              .formname,
-                                                          style: TextStyle(
-                                                              decoration: prvView
+                                          DataTable(
+                                              columnSpacing: 15,
+                                              columns: [
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          25,
+                                                  child: const Text('From'),
+                                                )),
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          25,
+                                                  child: const Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 10),
+                                                    child: Text('To'),
+                                                  ),
+                                                )),
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          6,
+                                                  child: const Center(
+                                                      child: Text('Document')),
+                                                )),
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          10,
+                                                  child: const Center(
+                                                      child: Text('Due Date')),
+                                                )),
+                                                /*  DataColumn(
+                                                label: SizedBox(
+                                              width: SizeConfig.screenWidth / 8,
+                                              child: const Center(
+                                                  child: Text('Status')),
+                                            )), */
+                                                DataColumn(
+                                                    label: SizedBox(
+                                                  width:
+                                                      SizeConfig.screenWidth /
+                                                          8,
+                                                  child: const Center(
+                                                      child: Text('Status')),
+                                                )),
+                                              ],
+                                              rows: [
+                                                for (var i = 0;
+                                                    i <
+                                                        prvView
+                                                            .launchpacks.length;
+                                                    i++)
+                                                  if ((prvView.launchpacks[i]
+                                                                  .visibility ==
+                                                              'public' ||
+                                                          (prvView
+                                                                      .launchpacks[
+                                                                          i]
+                                                                      .visibility ==
+                                                                  'private' &&
+                                                              (prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .fromcode ==
+                                                                      loginProvider
+                                                                          .logedinUser
+                                                                          .accountcode ||
+                                                                  prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .tocode ==
+                                                                      loginProvider
+                                                                          .logedinUser
+                                                                          .accountcode))) &&
+                                                      prvView.launchpacks[i]
+                                                              .attachmenttype ==
+                                                          'esign')
+                                                    DataRow.byIndex(
+                                                        index: i,
+                                                        cells: [
+                                                          DataCell(
+                                                            Row(
+                                                              children: [
+                                                                CustomProfileViewer(
+                                                                    account: prvView
+                                                                            .launchpacks[
+                                                                                i]
+                                                                            .fromcodedata ??
+                                                                        Account(
+                                                                            rolewithemployer: [])),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          DataCell(
+                                                            Row(
+                                                              children: [
+                                                                CustomProfileViewer(
+                                                                    account: prvView
+                                                                            .launchpacks[
+                                                                                i]
+                                                                            .tocodedata ??
+                                                                        Account(
+                                                                            rolewithemployer: [])),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          DataCell(
+                                                            GestureDetector(
+                                                                onTap:
+                                                                    () async {
+                                                                  Uri uri =
+                                                                      Uri.parse(
+                                                                          "$defaultActionItemPath${prvView.launchpacks[i].formcode}/${prvView.launchpacks[i].formcodewithextension}");
+                                                                  if (prvView
                                                                       .launchpacks[
                                                                           i]
                                                                       .formcodewithextension
-                                                                      .isNotEmpty
-                                                                  ? TextDecoration
-                                                                      .underline
-                                                                  : null),
-                                                        ),
-                                                      ),
-                                                    )),
-                                              ),
-                                              DataCell(
-                                                Center(
-                                                    child: Text(
-                                                        convertDateString(
-                                                            prvView
-                                                                .launchpacks[i]
-                                                                .duedate))),
-                                              )
-                                              /* DataCell(
-                                                Center(
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        DateFormat(
-                                                                'dd-MMM-yyyy')
-                                                            .format(DateTime
-                                                                .parse(prvView
-                                                                    .launchpacks[
-                                                                        i]
-                                                                    .duedate)),
-                                                      ),
-                                                      IconButton(
-                                                          onPressed: !(loginProvider
-                                                                          .logedinUser
-                                                                          .accountcode ==
-                                                                      prvView
-                                                                          .launchpacks[
-                                                                              i]
-                                                                          .tocode ||
-                                                                  loginProvider
-                                                                          .logedinUser
-                                                                          .accountcode ==
-                                                                      prvView
-                                                                          .launchpacks[
-                                                                              i]
-                                                                          .fromcode)
-                                                              ? null
-                                                              : () {
-                                                                  showDatePicker(
-                                                                    context:
-                                                                        context,
-                                                                    initialDate:
-                                                                        DateTime
-                                                                            .now(),
-                                                                    firstDate:
-                                                                        DateTime(
-                                                                            2000),
-                                                                    lastDate:
-                                                                        DateTime(
-                                                                            2100),
-                                                                  ).then(
-                                                                      (selectedDate) async {
-                                                                    if (selectedDate !=
-                                                                        null) {
-                                                                      bool result = await EliteDialog(
-                                                                          context,
-                                                                          'Please confirm',
-                                                                          'Do you want to save the changes?',
-                                                                          'Yes',
-                                                                          'No');
-                                                                      if (result) {
-                                                                        prvView.setLaunchDueDate(
-                                                                            i,
-                                                                            selectedDate);
-                                                                        prvView.updateLaunchFormStatus(
-                                                                            prvView.launchpacks[i].accountcode,
-                                                                            prvView.launchpacks[i].employercode,
-                                                                            prvView.launchpacks[i].formcode,
-                                                                            prvView.launchpacks[i].formstatus,
-                                                                            prvView.launchpacks[i].duedate);
-                                                                      }
+                                                                      .isNotEmpty) {
+                                                                    if (await canLaunchUrl(
+                                                                        uri)) {
+                                                                      await launchUrl(
+                                                                          uri);
                                                                     }
-                                                                  });
+                                                                  } else {
+                                                                    // Handle error when unable to launch the URL
+                                                                  }
                                                                 },
-                                                          icon: const Icon(
-                                                            Icons.date_range,
-                                                            color:
-                                                                AppColors.blue,
-                                                          )),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ), */
-                                              /* DataCell(
-                                                Center(
-                                                  child: DropdownButton<
-                                                      LaunchStatus>(
-                                                    value: prvView
-                                                        .launchStatusList
-                                                        .firstWhere(
-                                                            (element) =>
-                                                                element.code ==
-                                                                prvView
+                                                                child: Center(
+                                                                  child:
+                                                                      Tooltip(
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              25),
+                                                                      gradient:
+                                                                          const LinearGradient(
+                                                                              colors: <Color>[
+                                                                            AppColors.invite,
+                                                                            AppColors.red
+                                                                          ]),
+                                                                    ),
+                                                                    message: prvView
+                                                                        .launchpacks[
+                                                                            i]
+                                                                        .actionitemdata
+                                                                        ?.filename,
+                                                                    child: Text(
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .formname,
+                                                                      style: TextStyle(
+                                                                          decoration: prvView.launchpacks[i].formcodewithextension.isNotEmpty
+                                                                              ? TextDecoration.underline
+                                                                              : null),
+                                                                    ),
+                                                                  ),
+                                                                )),
+                                                          ),
+                                                          DataCell(
+                                                            Center(
+                                                                child: Text(convertDateString(prvView
                                                                     .launchpacks[
                                                                         i]
-                                                                    .formstatus,
-                                                            orElse: () => prvView
-                                                                .launchStatusList[0]),
-                                                    onChanged: !(loginProvider
-                                                                    .logedinUser
-                                                                    .accountcode ==
-                                                                prvView
-                                                                    .launchpacks[
-                                                                        i]
-                                                                    .tocode ||
-                                                            loginProvider
-                                                                    .logedinUser
-                                                                    .accountcode ==
-                                                                prvView
-                                                                    .launchpacks[
-                                                                        i]
-                                                                    .fromcode)
-                                                        ? null
-                                                        : (newValue) async {
-                                                            // add your code to handle the value change here
-                                                            bool result =
-                                                                await EliteDialog(
-                                                                    context,
-                                                                    'Please confirm',
-                                                                    'Do you want to save the changes?',
-                                                                    'Yes',
-                                                                    'No');
-                                                            if (result) {
-                                                              prvView
-                                                                  .setLaunchStatus(
-                                                                      i,
-                                                                      newValue!);
-                                                              prvView.updateLaunchFormStatus(
-                                                                  prvView
-                                                                      .launchpacks[
-                                                                          i]
-                                                                      .accountcode,
-                                                                  prvView
-                                                                      .launchpacks[
-                                                                          i]
-                                                                      .employercode,
-                                                                  prvView
-                                                                      .launchpacks[
-                                                                          i]
-                                                                      .formcode,
-                                                                  prvView
-                                                                      .launchpacks[
-                                                                          i]
-                                                                      .formstatus,
-                                                                  prvView
-                                                                      .launchpacks[
-                                                                          i]
-                                                                      .duedate);
-                                                            }
-                                                          },
-                                                    items: prvView
-                                                        .launchStatusList
-                                                        .where((e) =>
-                                                            e.key ==
-                                                            prvView
-                                                                .launchpacks[i]
-                                                                .attachmenttype)
-                                                        .map((status) {
-                                                      return DropdownMenuItem<
+                                                                    .duedate))),
+                                                          )
+                                                          /* DataCell(
+                                                    Center(
+                                                      child: Row(
+                                                        children: [
+                                                          Text(
+                                                            DateFormat(
+                                                                    'dd-MMM-yyyy')
+                                                                .format(DateTime
+                                                                    .parse(prvView
+                                                                        .launchpacks[
+                                                                            i]
+                                                                        .duedate)),
+                                                          ),
+                                                          IconButton(
+                                                              onPressed: !(loginProvider
+                                                                              .logedinUser
+                                                                              .accountcode ==
+                                                                          prvView
+                                                                              .launchpacks[
+                                                                                  i]
+                                                                              .tocode ||
+                                                                      loginProvider
+                                                                              .logedinUser
+                                                                              .accountcode ==
+                                                                          prvView
+                                                                              .launchpacks[
+                                                                                  i]
+                                                                              .fromcode)
+                                                                  ? null
+                                                                  : () {
+                                                                      showDatePicker(
+                                                                        context:
+                                                                            context,
+                                                                        initialDate:
+                                                                            DateTime
+                                                                                .now(),
+                                                                        firstDate:
+                                                                            DateTime(
+                                                                                2000),
+                                                                        lastDate:
+                                                                            DateTime(
+                                                                                2100),
+                                                                      ).then(
+                                                                          (selectedDate) async {
+                                                                        if (selectedDate !=
+                                                                            null) {
+                                                                          bool result = await EliteDialog(
+                                                                              context,
+                                                                              'Please confirm',
+                                                                              'Do you want to save the changes?',
+                                                                              'Yes',
+                                                                              'No');
+                                                                          if (result) {
+                                                                            prvView.setLaunchDueDate(
+                                                                                i,
+                                                                                selectedDate);
+                                                                            prvView.updateLaunchFormStatus(
+                                                                                prvView.launchpacks[i].accountcode,
+                                                                                prvView.launchpacks[i].employercode,
+                                                                                prvView.launchpacks[i].formcode,
+                                                                                prvView.launchpacks[i].formstatus,
+                                                                                prvView.launchpacks[i].duedate);
+                                                                          }
+                                                                        }
+                                                                      });
+                                                                    },
+                                                              icon: const Icon(
+                                                                Icons.date_range,
+                                                                color:
+                                                                    AppColors.blue,
+                                                              )),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ), */
+                                                          /* DataCell(
+                                                    Center(
+                                                      child: DropdownButton<
                                                           LaunchStatus>(
-                                                        value: status,
-                                                        child: Text(
-                                                          status.name,
-                                                          style:
-                                                              getColoredTextStyle(
-                                                                  status.code),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
-                                                      );
-                                                    }).toList(),
+                                                        value: prvView
+                                                            .launchStatusList
+                                                            .firstWhere(
+                                                                (element) =>
+                                                                    element.code ==
+                                                                    prvView
+                                                                        .launchpacks[
+                                                                            i]
+                                                                        .formstatus,
+                                                                orElse: () => prvView
+                                                                    .launchStatusList[0]),
+                                                        onChanged: !(loginProvider
+                                                                        .logedinUser
+                                                                        .accountcode ==
+                                                                    prvView
+                                                                        .launchpacks[
+                                                                            i]
+                                                                        .tocode ||
+                                                                loginProvider
+                                                                        .logedinUser
+                                                                        .accountcode ==
+                                                                    prvView
+                                                                        .launchpacks[
+                                                                            i]
+                                                                        .fromcode)
+                                                            ? null
+                                                            : (newValue) async {
+                                                                // add your code to handle the value change here
+                                                                bool result =
+                                                                    await EliteDialog(
+                                                                        context,
+                                                                        'Please confirm',
+                                                                        'Do you want to save the changes?',
+                                                                        'Yes',
+                                                                        'No');
+                                                                if (result) {
+                                                                  prvView
+                                                                      .setLaunchStatus(
+                                                                          i,
+                                                                          newValue!);
+                                                                  prvView.updateLaunchFormStatus(
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .accountcode,
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .employercode,
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .formcode,
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .formstatus,
+                                                                      prvView
+                                                                          .launchpacks[
+                                                                              i]
+                                                                          .duedate);
+                                                                }
+                                                              },
+                                                        items: prvView
+                                                            .launchStatusList
+                                                            .where((e) =>
+                                                                e.key ==
+                                                                prvView
+                                                                    .launchpacks[i]
+                                                                    .attachmenttype)
+                                                            .map((status) {
+                                                          return DropdownMenuItem<
+                                                              LaunchStatus>(
+                                                            value: status,
+                                                            child: Text(
+                                                              status.name,
+                                                              style:
+                                                                  getColoredTextStyle(
+                                                                      status.code),
+                                                              overflow: TextOverflow
+                                                                  .ellipsis,
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                              ),
-                                              */
-                                              ,
-                                              DataCell(
-                                                Center(
-                                                    child: ListTile(
-                                                  leading: IconButton(
-                                                      onPressed: () {},
-                                                      icon: Image.asset(
-                                                          'assets/ontask.png')),
-                                                  title: Text(
-                                                    prvView.launchpacks[i]
-                                                        .formstatus,
-                                                    style: getColoredTextStyle(
-                                                        prvView.launchpacks[i]
-                                                            .formstatus),
-                                                  ),
-                                                )),
-                                              ),
-                                            ]),
-                                      ]),
+                                                  */
+                                                          ,
+                                                          DataCell(
+                                                            Center(
+                                                                child: ListTile(
+                                                              leading:
+                                                                  IconButton(
+                                                                      onPressed:
+                                                                          () {},
+                                                                      icon: Image
+                                                                          .asset(
+                                                                        'assets/ontask.png',
+                                                                        color: AppColors
+                                                                            .iconGray,
+                                                                      )),
+                                                              title: Text(
+                                                                prvView
+                                                                    .launchStatusList
+                                                                    .firstWhere((e) =>
+                                                                        e.code ==
+                                                                        prvView
+                                                                            .launchpacks[i]
+                                                                            .formstatus)
+                                                                    .name,
+                                                                style: getColoredTextStyle(prvView
+                                                                    .launchpacks[
+                                                                        i]
+                                                                    .formstatus),
+                                                              ),
+                                                            )),
+                                                          ),
+                                                        ]),
+                                              ]),
+                                        ],
+                                      ),
                               );
                       }),
+                      const Text(""),
                       Consumer<RoomsProvider>(
                           builder: (context, prvAno, child) {
                         return prvAno.readingAnonymousEntries
                             ? displaySpin()
                             : SingleChildScrollView(
-                                child: DataTable(columnSpacing: 15, columns: [
-                                  DataColumn(
-                                      label: SizedBox(
-                                    width: SizeConfig.screenWidth / 25,
-                                    child: const Text(''),
-                                  )),
-                                  DataColumn(
-                                      label: SizedBox(
-                                    width: SizeConfig.screenWidth / 25,
-                                    child: const Padding(
-                                      padding: EdgeInsets.only(left: 10),
-                                      child: Text(''),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Documents sent to someone outside of the advisor platform",
+                                      style: appstyle,
                                     ),
-                                  )),
-                                  DataColumn(
-                                      label: SizedBox(
-                                    width: SizeConfig.screenWidth / 6,
-                                    child: const Center(child: Text('')),
-                                  )),
-                                  DataColumn(
-                                      label: SizedBox(
-                                    width: SizeConfig.screenWidth / 10,
-                                    child: const Center(child: Text('')),
-                                  )),
-                                  DataColumn(
-                                      label: SizedBox(
-                                    width: SizeConfig.screenWidth / 8,
-                                    child: const Center(child: Text('')),
-                                  )),
-                                ], rows: [
-                                  for (var i = 0;
-                                      i < prvAno.anonymousEntries.length;
-                                      i++)
-                                    DataRow.byIndex(index: i, cells: [
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            CustomProfileViewer(
-                                                account: prvAno
-                                                        .anonymousEntries[i]
-                                                        .accountcodedata ??
-                                                    Account(
-                                                        rolewithemployer: [])),
-                                          ],
+                                    DataTable(columnSpacing: 15, columns: [
+                                      DataColumn(
+                                          label: SizedBox(
+                                        width: SizeConfig.screenWidth / 25,
+                                        child: const Text('From'),
+                                      )),
+                                      DataColumn(
+                                          label: SizedBox(
+                                        width: SizeConfig.screenWidth / 25,
+                                        child: const Padding(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: Text('To'),
                                         ),
-                                      ),
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            CustomProfileViewer(
-                                                account: Account(
-                                                    accountcode: "",
-                                                    accountname: prvAno
-                                                        .anonymousEntries[i]
-                                                        .firstname,
-                                                    lastname: prvAno
-                                                        .anonymousEntries[i]
-                                                        .lastname,
-                                                    workemail: prvAno
-                                                        .anonymousEntries[i]
-                                                        .thirdpartyemail,
-                                                    rolewithemployer: []))
-                                          ],
-                                        ),
-                                      ),
-                                      DataCell(
-                                        GestureDetector(
-                                          onTap: () async {
-                                            String downloadAction =
-                                                "Advisor/DownloadESignDocumentAsync?documentId=";
-                                            Uri uri = Uri.parse(
-                                                "$webApiserviceURL$downloadAction${prvAno.anonymousEntries[i].processdocumentid}");
-
-                                            if (prvAno.anonymousEntries[i]
-                                                .documentname.isNotEmpty) {
-                                              if (await canLaunchUrl(uri)) {
-                                                await launchUrl(uri);
-                                              }
-                                            } else {
-                                              // Handle error when unable to launch the URL
-                                            }
-                                          },
-                                          child: Center(
-                                            child: Tooltip(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(25),
-                                                gradient: const LinearGradient(
-                                                    colors: <Color>[
-                                                      AppColors.invite,
-                                                      AppColors.red
-                                                    ]),
-                                              ),
-                                              message: prvAno
-                                                  .anonymousEntries[i]
-                                                  .documentname,
-                                              child: Text(
-                                                prvAno.anonymousEntries[i]
-                                                    .documentname,
-                                                style: TextStyle(
-                                                    decoration: prvAno
+                                      )),
+                                      DataColumn(
+                                          label: SizedBox(
+                                        width: SizeConfig.screenWidth / 6,
+                                        child: const Center(
+                                            child: Text('Document')),
+                                      )),
+                                      DataColumn(
+                                          label: SizedBox(
+                                        width: SizeConfig.screenWidth / 10,
+                                        child: const Center(
+                                            child: Text('Due Date')),
+                                      )),
+                                      DataColumn(
+                                          label: SizedBox(
+                                        width: SizeConfig.screenWidth / 8,
+                                        child:
+                                            const Center(child: Text('Status')),
+                                      )),
+                                    ], rows: [
+                                      for (var i = 0;
+                                          i < prvAno.anonymousEntries.length;
+                                          i++)
+                                        DataRow.byIndex(index: i, cells: [
+                                          DataCell(
+                                            Row(
+                                              children: [
+                                                CustomProfileViewer(
+                                                    account: prvAno
                                                             .anonymousEntries[i]
-                                                            .anonymouscode
-                                                            .isNotEmpty
-                                                        ? TextDecoration
-                                                            .underline
-                                                        : null),
+                                                            .accountcodedata ??
+                                                        Account(
+                                                            rolewithemployer: [])),
+                                              ],
+                                            ),
+                                          ),
+                                          DataCell(
+                                            Row(
+                                              children: [
+                                                CustomProfileViewer(
+                                                    account: Account(
+                                                        accountcode: "",
+                                                        accountname: prvAno
+                                                            .anonymousEntries[i]
+                                                            .firstname,
+                                                        lastname: prvAno
+                                                            .anonymousEntries[i]
+                                                            .lastname,
+                                                        workemail: prvAno
+                                                            .anonymousEntries[i]
+                                                            .thirdpartyemail,
+                                                        rolewithemployer: []))
+                                              ],
+                                            ),
+                                          ),
+                                          DataCell(
+                                            GestureDetector(
+                                              onTap: () async {
+                                                String downloadAction =
+                                                    "Advisor/DownloadESignDocumentAsync?documentId=";
+                                                Uri uri = Uri.parse(
+                                                    "$webApiserviceURL$downloadAction${prvAno.anonymousEntries[i].processdocumentid}");
+
+                                                if (prvAno.anonymousEntries[i]
+                                                    .documentname.isNotEmpty) {
+                                                  if (await canLaunchUrl(uri)) {
+                                                    await launchUrl(uri);
+                                                  }
+                                                } else {
+                                                  // Handle error when unable to launch the URL
+                                                }
+                                              },
+                                              child: Center(
+                                                child: Tooltip(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            25),
+                                                    gradient:
+                                                        const LinearGradient(
+                                                            colors: <Color>[
+                                                          AppColors.invite,
+                                                          AppColors.red
+                                                        ]),
+                                                  ),
+                                                  message: prvAno
+                                                      .anonymousEntries[i]
+                                                      .documentname,
+                                                  child: Text(
+                                                    prvAno.anonymousEntries[i]
+                                                        .documentname,
+                                                    style: TextStyle(
+                                                        decoration: prvAno
+                                                                .anonymousEntries[
+                                                                    i]
+                                                                .anonymouscode
+                                                                .isNotEmpty
+                                                            ? TextDecoration
+                                                                .underline
+                                                            : null),
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Center(
-                                            child: Text((prvAno
-                                                .anonymousEntries[i]
-                                                .startson))),
-                                      ),
-                                      DataCell(
-                                        Center(
-                                            child: ListTile(
-                                          leading: IconButton(
-                                              onPressed: () {},
-                                              icon: Image.asset(
-                                                  'assets/ontask.png')),
-                                          title: Text(
-                                            prvAno.anonymousEntries[i]
-                                                .overallstatus,
-                                            style: getColoredTextStyle(prvAno
-                                                .anonymousEntries[i]
-                                                .overallstatus),
+                                          DataCell(
+                                            Center(
+                                                child: Text((prvAno
+                                                    .anonymousEntries[i]
+                                                    .startson))),
                                           ),
-                                        )),
-                                      ),
+                                          DataCell(
+                                            Center(
+                                                child: ListTile(
+                                              leading: IconButton(
+                                                  onPressed: () {},
+                                                  icon: Image.asset(
+                                                    'assets/ontask.png',
+                                                    color: AppColors.iconGray,
+                                                  )),
+                                              title: Text(
+                                                prvAno.anonymousEntries[i]
+                                                    .overallstatus,
+                                                style: getColoredTextStyle(
+                                                    prvAno.anonymousEntries[i]
+                                                        .overallstatus),
+                                              ),
+                                            )),
+                                          ),
+                                        ]),
                                     ]),
-                                ]),
+                                  ],
+                                ),
                               );
                       }),
                     ],

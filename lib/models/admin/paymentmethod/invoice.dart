@@ -1,6 +1,7 @@
 import 'package:advisorapp/models/account.dart';
 
 class Invoice {
+  String invoicenumber;
   String total;
   String createdby = '';
   Account? createdbydata;
@@ -8,6 +9,7 @@ class Invoice {
   String totalfees;
   String paidon;
   Invoice({
+    this.invoicenumber = '',
     this.total = '',
     this.createdby = '',
     this.createdbydata,
@@ -18,6 +20,7 @@ class Invoice {
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
     return Invoice(
+      invoicenumber: json['invoicenumber'],
         total: json['total'],
         createdby: json['createdby'],
         createdbydata: (json['createdbydata'] != null)
@@ -29,14 +32,23 @@ class Invoice {
   }
   dynamic getIndex(int index) {
     switch (index) {
-      case 0:
+      /* case 0:
         return total;
       case 1:
-        return '$peruserlicensefee\$';
+        return '\$$peruserlicensefee';
       case 2:
-        return '$totalfees\$';
+        return '\$$totalfees';
       case 3:
         return createdbydata!.accountname;
+         */
+      case 0:
+        return 'ALICORN advisor platform\nSubscription fee';
+      case 1:
+        return total;
+      case 2:
+        return '\$$peruserlicensefee';
+      case 3:
+        return '\$$totalfees';
     }
     return '';
   }

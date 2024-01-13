@@ -4,6 +4,7 @@ import 'package:advisorapp/custom/custom_text_decoration.dart';
 import 'package:advisorapp/models/account.dart';
 import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/role.dart';
+import 'package:advisorapp/providers/admin_provider.dart';
 import 'package:advisorapp/providers/image_provider.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/master_provider.dart';
@@ -28,6 +29,11 @@ class YourProfileForm extends StatelessWidget {
     double screenWidth = SizeConfig.screenWidth / 2;
     EdgeInsets paddingConfig = const EdgeInsets.all(4);
     final loginProvider = Provider.of<LoginProvider>(context, listen: false);
+    final adminProv = Provider.of<AdminProvider>(context, listen: false);
+
+    final bool issuperadmin = adminProv.adminusers
+        .any((user) => user.emailid == loginProvider.logedinUser.workemail);
+
     final prvMaster = Provider.of<MasterProvider>(context, listen: false);
 
     Role? objAccRole;
@@ -214,6 +220,7 @@ class YourProfileForm extends StatelessWidget {
             child: SizedBox(
               width: screenWidth,
               child: TextFormField(
+                readOnly: true,
                 //initialValue: loginProvider.logedinUser?.phonenumber,
                 controller: loginProvider.workemailController,
                 keyboardType: TextInputType.text,
@@ -276,7 +283,8 @@ class YourProfileForm extends StatelessWidget {
             ),
           ),
           Visibility(
-            visible: (companyCate.categoryname != 'Employer'),
+            visible: true,
+            /* (companyCate.categoryname != 'Employer'), */
             child: Padding(
               padding: paddingConfig,
               child: Consumer<MasterProvider>(
@@ -316,10 +324,17 @@ class YourProfileForm extends StatelessWidget {
                                             currentRole.rolecode);
                               }).toList()
                             : prvNew.selectedEmployerRole!,
-                        items: prvNew.employerroles
-                            .map((role) => MultiSelectItem(role, role.rolename))
-                            .toSet()
-                            .toList(),
+                        items: (companyCate.categoryname == 'Employer')
+                            ? prvNew.employerroles
+                                .map((role) =>
+                                    MultiSelectItem(role, role.rolename))
+                                .toSet()
+                                .toList()
+                            : prvNew.partnerroles
+                                .map((role) =>
+                                    MultiSelectItem(role, role.rolename))
+                                .toSet()
+                                .toList(),
                         title: const Text(
                           "Add Roles",
                           style: TextStyle(
@@ -337,9 +352,11 @@ class YourProfileForm extends StatelessWidget {
                           Icons.pattern,
                           color: AppColors.black,
                         ),
-                        buttonText: const Text(
-                          "Your Role With Employers",
-                          style: TextStyle(
+                        buttonText: Text(
+                          companyCate.categoryname != 'Employer'
+                              ? "Your Role With Employers"
+                              : "Your Role With Partners",
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 2,
@@ -556,58 +573,64 @@ class YourProfileForm extends StatelessWidget {
                     width: 150,
                     child: ElevatedButton(
                       style: buttonStyleAmber,
-                      child: const Text('Next'),
-                      onPressed: () async {
-                        try {
-                          if (loginProvider.cachedAccount != null) {
-                            List<Role> selectedRoles =
-                                (prvMaster.selectedEmployerRole == null)
-                                    ? loginProvider
-                                        .cachedAccount!.rolewithemployer
-                                    : prvMaster.selectedEmployerRole!;
+                      onPressed: issuperadmin
+                          ? null
+                          : () async {
+                              try {
+                                if (loginProvider.cachedAccount != null) {
+                                  List<Role> selectedRoles =
+                                      (prvMaster.selectedEmployerRole == null)
+                                          ? loginProvider
+                                              .cachedAccount!.rolewithemployer
+                                          : prvMaster.selectedEmployerRole!;
 
-                            Account obj = loginProvider.cachedAccount!;
-                            obj.accountname = loginProvider.nameController.text;
-                            obj.lastname =
-                                loginProvider.lastnameController.text;
-                            obj.worktitle =
-                                loginProvider.worktitleController.text;
-                            obj.rolewithemployer = selectedRoles;
-                            obj.phonenumber =
-                                loginProvider.phoneController.text;
-                            obj.mobilenumber =
-                                loginProvider.mobileController.text;
-                            obj.workemail =
-                                loginProvider.workemailController.text;
-                            obj.accountrole =
-                                (prvMaster.selectedAccountRole == null)
-                                    ? objAccRole!.rolecode
-                                    : prvMaster.selectedAccountRole!.rolecode;
+                                  Account obj = loginProvider.cachedAccount!;
+                                  obj.accountname =
+                                      loginProvider.nameController.text;
+                                  obj.lastname =
+                                      loginProvider.lastnameController.text;
+                                  obj.worktitle =
+                                      loginProvider.worktitleController.text;
+                                  obj.rolewithemployer = selectedRoles;
+                                  obj.phonenumber =
+                                      loginProvider.phoneController.text;
+                                  obj.mobilenumber =
+                                      loginProvider.mobileController.text;
+                                  obj.workemail =
+                                      loginProvider.workemailController.text;
+                                  obj.accountrole =
+                                      (prvMaster.selectedAccountRole == null)
+                                          ? objAccRole!.rolecode
+                                          : prvMaster
+                                              .selectedAccountRole!.rolecode;
 
-                            obj.accountcode =
-                                loginProvider.logedinUser.accountcode;
+                                  obj.accountcode =
+                                      loginProvider.logedinUser.accountcode;
 
-                            loginProvider.addInCache(obj);
-                            await loginProvider
-                                .updateAccount(obj)
-                                .then((value) => {
-                                      if (companyCate.categoryname !=
-                                          'Employer')
-                                        {
-                                          Navigator.of(context)
-                                              .popAndPushNamed("/addLaunchPack")
-                                        }
-                                      else
-                                        {
-                                          Navigator.of(context)
-                                              .popAndPushNamed("/addOther")
-                                        }
-                                    });
-                          }
-                        } catch (e) {
-                          null;
-                        } finally {}
-                      },
+                                  loginProvider.addInCache(obj);
+                                  await loginProvider
+                                      .updateAccount(obj)
+                                      .then((value) => {
+                                            if (companyCate.categoryname !=
+                                                'Employer')
+                                              {
+                                                Navigator.of(context)
+                                                    .popAndPushNamed(
+                                                        "/addLaunchPack")
+                                              }
+                                            else
+                                              {
+                                                Navigator.of(context)
+                                                    .popAndPushNamed(
+                                                        "/addOther")
+                                              }
+                                          });
+                                }
+                              } catch (e) {
+                                null;
+                              } finally {}
+                            },
+                      child: Text('Next'),
                     ),
                   ),
                 ],

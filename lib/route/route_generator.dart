@@ -1,3 +1,4 @@
+import 'package:advisorapp/adminforms/invoices.dart';
 import 'package:advisorapp/adminforms/mysubscription.dart';
 import 'package:advisorapp/adminforms/paymentmethods/formpaymentmethod.dart';
 import 'package:advisorapp/checkout/checkoutwidget.dart';
@@ -153,6 +154,12 @@ class RouteGenerator {
         {
           matPageRoute =
               NoDuplicatePageRoute(builder: (_) => const FormPaymentMethod());
+        }
+        break;
+      case '/Invoices':
+        {
+          matPageRoute =
+              NoDuplicatePageRoute(builder: (_) => const FormInvoices());
         }
         break;
 

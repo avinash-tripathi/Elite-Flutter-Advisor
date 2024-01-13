@@ -79,7 +79,6 @@ class MicrosoftAuthWidget extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () async {
                 await loginMicrosoft.microsoftLogin();
-
                 if (loginMicrosoft.accessToken != null) {
                   await loginMicrosoft.getAuthenticatedUserData();
                   Account? res;
@@ -95,6 +94,7 @@ class MicrosoftAuthWidget extends StatelessWidget {
                               Navigator.pushNamed(context, "/companyProfile"));
                     } else if (res.accountcode.trim().length > 1 &&
                         res.invitationstatus.toUpperCase() == 'EXPIRED') {
+                      // ignore: use_build_context_synchronously
                       showSnackBar(context,
                           'Your invitation has expired. Please request the person that sent you the invitation to resend it. ');
                     } else {
@@ -104,6 +104,7 @@ class MicrosoftAuthWidget extends StatelessWidget {
                         prvMicrosoft.microsoftLogout();
                       }
 
+                      // ignore: use_build_context_synchronously
                       showSnackBar(context, 'Invalid Credential');
                     }
                   }

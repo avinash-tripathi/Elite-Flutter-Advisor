@@ -63,10 +63,6 @@ class InviteOther extends StatelessWidget {
                           children: [
                             TextButton(
                               onPressed: () {
-                                /*    final addOtherProvider =
-                                    Provider.of<AddotherProvider>(context,
-                                        listen: false); */
-
                                 Role objRole = mPrv.accountroles
                                     .firstWhere((e) => e.rolename == 'User');
                                 BaseCompanyCategory objBaseC =
@@ -123,6 +119,12 @@ class InviteOther extends StatelessWidget {
                                                 SizedBox(
                                                   width: screenWidth * 3 / 4,
                                                   child: TextFormField(
+                                                    readOnly: prvaddOther
+                                                            .filteredinvites[
+                                                                index]
+                                                            .invitationstatus
+                                                            .toUpperCase() ==
+                                                        'JOINED',
                                                     initialValue: prvaddOther
                                                         .filteredinvites[index]
                                                         .invitedemail,
@@ -294,7 +296,7 @@ class InviteOther extends StatelessWidget {
                                                                           .validate()) {
                                                                         bool result = await EliteDialog(
                                                                             context,
-                                                                            'Please Confirm?',
+                                                                            'Please confirm',
                                                                             'Please make sure that the invited person is an advisor.\nAdvsiors are also known as benefits consultants or brokers.',
                                                                             'Ok',
                                                                             'Cancel');

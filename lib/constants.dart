@@ -5,8 +5,8 @@ import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
-import 'package:advisorapp/config/dev.dart'
-    if (dart.library.io) 'package:advisorapp/config/prod.dart';
+import 'package:advisorapp/config/prod.dart'
+    if (dart.library.html) 'package:advisorapp/config/dev.dart';
 
 /* const String secretID = "b3134070-638c-42ec-b635-64ba32cdef92";
 const String secretValue = "yY78Q~w-IQWGf2tOcDiq5jcrcegOhj8Ueg6odcLK";
@@ -22,18 +22,20 @@ const String microsoftAuthredirectUri = 'https://advisor.alicorn.co/'; */
 //DEV CONIG
 const String webApiserviceURL = AppConfig.webApiserviceURL;
 //const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
-const String microsoftClientId = 'a5489f64-06e7-4dfa-920c-196436ea8c46';
-const String microsoftAuthredirectUri = 'http://localhost:5000/';
+const String microsoftClientId =
+    AppConfig.microsoftClientId; // 'a5489f64-06e7-4dfa-920c-196436ea8c46';
+const String microsoftAuthredirectUri =
+    AppConfig.microsoftAuthredirectUri; //'http://localhost:5000/';
 
-const String basePathOfLogo =
-    'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
-const String defaultimagePath =
-    'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/default.png';
-const String defaultActionItemPath =
-    'https://advisorformsftp.blob.core.windows.net/advisorform/';
+const String basePathOfLogo = AppConfig
+    .basePathOfLogo; //'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
+const String defaultimagePath = AppConfig
+    .defaultimagePath; // 'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/default.png';
+const String defaultActionItemPath = AppConfig.defaultActionItemPath;
+//'https://advisorformsftp.blob.core.windows.net/advisorform/';
 
-const String defaultIdeaPath =
-    'https://advisorformsftp.blob.core.windows.net/advisorideas/';
+const String defaultIdeaPath = AppConfig.defaultIdeaPath;
+//'https://advisorformsftp.blob.core.windows.net/advisorideas/';
 
 // add these in a constant file preferably in constant/dimensions.dart
 //start of dimensions.dart file
@@ -155,6 +157,7 @@ bool areValidEmails(String text, String domain) {
 
 TextStyle getColoredTextStyle(String parameter) {
   if (parameter == 'noneInProgress' ||
+      parameter == 'noneinprogress' ||
       parameter == 'InProgress' ||
       parameter == 'inprogress' ||
       parameter == 'private' ||
@@ -265,6 +268,12 @@ ButtonStyle buttonStyleRed = ElevatedButton.styleFrom(
     borderRadius: BorderRadius.circular(20),
   ),
 );
+ButtonStyle buttonStyleTransparent = ElevatedButton.styleFrom(
+  backgroundColor: Colors.transparent,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+  ),
+);
 ButtonStyle roundbuttonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(20),
@@ -355,10 +364,19 @@ Future<bool> EliteDialog(BuildContext context, String commenttitle,
                     ? AppColors.invite
                     : (commenttitle == 'Alert')
                         ? AppColors.red
-                        : (commenttitle == 'Please Confirm?')
+                        : (commenttitle == 'Please confirm')
                             ? AppColors.action
                             : AppColors.black)),
-        content: Text(commentcontent),
+        content: SizedBox(
+          width: SizeConfig.screenWidth / 4,
+          child: Text(
+            Bidi.hasAnyRtl(commentcontent)
+                ? commentcontent
+                : Bidi.stripHtmlIfNeeded(commentcontent),
+            textAlign: TextAlign.justify,
+            textWidthBasis: TextWidthBasis.longestLine,
+          ),
+        ),
         actions: <Widget>[
           SizedBox(
             width: 150,
@@ -370,16 +388,19 @@ Future<bool> EliteDialog(BuildContext context, String commenttitle,
               child: Text(oxtext),
             ),
           ),
-          SizedBox(
-            width: 150,
-            child: ElevatedButton(
-              style: buttonStyleRed,
-              onPressed: () {
-                Navigator.of(context).pop(false); // Return 'No' result
-              },
-              child: Text(canceltext),
-            ),
-          ),
+          (commenttitle == "Alert" || commenttitle == "Warning")
+              ? const Text('')
+              : SizedBox(
+                  width: 150,
+                  child: ElevatedButton(
+                    style: canceltext.isEmpty
+                        ? buttonStyleTransparent
+                        : buttonStyleRed,
+                    onPressed: () {
+                      Navigator.of(context).pop(false); // Return 'No' result
+                    },
+                    child: Text(canceltext),
+                  )),
         ],
       );
     },

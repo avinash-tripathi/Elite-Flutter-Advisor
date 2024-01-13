@@ -2,7 +2,7 @@ import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/custom/custom_text_decoration.dart';
 import 'package:advisorapp/models/advisorinvitation.dart';
-import 'package:advisorapp/models/company.dart';
+
 import 'package:advisorapp/models/companycategory.dart';
 import 'package:advisorapp/models/partner.dart';
 import 'package:advisorapp/models/role.dart';
@@ -11,7 +11,7 @@ import 'package:advisorapp/providers/master_provider.dart';
 import 'package:advisorapp/providers/partner_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_textfield_autocomplete/flutter_textfield_autocomplete.dart';
+
 import 'package:provider/provider.dart';
 
 class SLPartnerEntry extends StatelessWidget {
@@ -21,15 +21,15 @@ class SLPartnerEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     final formKey = GlobalKey<FormState>();
-    double screenWidth = SizeConfig.screenWidth / 2.5;
+    double screenWidth = SizeConfig.screenWidth / 2;
     EdgeInsets paddingConfig = const EdgeInsets.all(4);
-    GlobalKey<TextFieldAutoCompleteState<String>> key = GlobalKey();
+    //GlobalKey<TextFieldAutoCompleteState<String>> key = GlobalKey();
     var master = Provider.of<MasterProvider>(context, listen: false);
     CompanyCategory objPartnerCategory =
         master.companycategories.firstWhere((j) => j.categorycode == 'select');
 
     CompanyCategory objInviteWithCategory =
-        master.companycategories.firstWhere((e) => e.categoryname == 'TPA');
+        master.companycategories.firstWhere((e) => e.basecategorycode == 'tpa');
 
     final prvPartner = Provider.of<PartnerProvider>(context, listen: false);
     if (prvPartner.edit) {
@@ -87,12 +87,13 @@ class SLPartnerEntry extends StatelessWidget {
                             value: obj,
                             enabled: (obj.categoryname != 'Employer' &&
                                 obj.categoryname != 'Advisor' &&
-                                obj.categoryname != 'Select'),
+                                obj.categoryname != 'Select Company Category'),
                             child: Text(obj.categoryname,
                                 style: TextStyle(
                                     color: (obj.categoryname == 'Employer' ||
                                             obj.categoryname == 'Advisor' ||
-                                            obj.categorycode == 'select')
+                                            obj.categorycode ==
+                                                'Select Company Category')
                                         ? AppColors.iconGray
                                         : AppColors.black)),
                           );
@@ -291,6 +292,14 @@ class SLPartnerEntry extends StatelessWidget {
                     decoration: tooltipdecoration,
                     textStyle: const TextStyle(color: AppColors.black),
                     child: TextFormField(
+                      readOnly: (prvPartner.selectedPartner!
+                                  .contractsignatoryemailinvitationstatus
+                                  .toUpperCase() ==
+                              "JOINED" ||
+                          prvPartner.selectedPartner!
+                                  .contractsignatoryemailinvitationstatus
+                                  .toUpperCase() ==
+                              "INVITED"),
                       controller: prvPartner.contractSignatoryEmailController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: CustomTextDecoration.textDecoration(

@@ -11,6 +11,7 @@ import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
 import 'package:advisorapp/models/esign/esigndocument.dart';
 import 'package:advisorapp/models/launchpack.dart';
 import 'package:advisorapp/models/launchstatus.dart';
+import 'package:advisorapp/models/mail/newactionitemmail.dart';
 import 'package:advisorapp/models/visibilitystatus.dart';
 import 'package:advisorapp/service/esignservice.dart';
 import 'package:advisorapp/service/httpservice.dart';
@@ -29,6 +30,12 @@ class RoomsProvider extends ChangeNotifier {
   bool get readingAnonymousEntries => _readingAnonymousEntries;
   set readingAnonymousEntries(bool obj) {
     _readingAnonymousEntries = obj;
+    notifyListeners();
+  }
+
+  Future<void> removeLaunchPack(index) async {
+    _actionlaunchpacks.removeAt(index);
+    newActionItem = false;
     notifyListeners();
   }
 
@@ -62,20 +69,20 @@ class RoomsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /*  ESignEmbeddedResponse? _esignembededdata;
+  ESignEmbeddedResponse? _esignembededdata;
   ESignEmbeddedResponse? get esignembededdata => _esignembededdata;
   set esignembededdata(ESignEmbeddedResponse? obj) {
     _esignembededdata = obj;
     notifyListeners();
-  } */
+  }
 
-  /*  Future<ESignEmbeddedResponse> generateESignEmbeddedURL(
-      documentid, formdefinitionid) async {
-    _esignembededdata = await EsignService()
+  Future<void> generateESignEmbeddedURL(documentid, formdefinitionid) async {
+    _esignembededdata = await HttpService()
         .generateESignEmbeddedURL(documentid, formdefinitionid);
-    return _esignembededdata!;
-    //notifyListeners();
-  } */
+
+    notifyListeners();
+  }
+
   bool _viewIframe = false;
   bool get viewIframe => _viewIframe;
   set viewIframe(bool obj) {
@@ -128,6 +135,7 @@ class RoomsProvider extends ChangeNotifier {
     final input = html.InputElement(type: 'file');
     // MyFile objdummy = MyFile(name: '', base64: '', fileextension: '');
     input.click();
+
     await input.onChange.first;
     if (input.files!.isNotEmpty) {
       final file = input.files?.first;
@@ -141,6 +149,7 @@ class RoomsProvider extends ChangeNotifier {
       obj.documentname = file.name;
       obj.filebase64 = encoded;
       obj.contentmimetype = file.type;
+
       return obj;
 
       /*   notifyListeners(); */
@@ -153,7 +162,7 @@ class RoomsProvider extends ChangeNotifier {
   Future<void> getLaunchStausList() async {
     launchStatusList.clear();
     launchStatusList.add(
-        LaunchStatus(code: 'InProgress', name: 'In Progress', key: 'file'));
+        LaunchStatus(code: 'inprogress', name: 'In Progress', key: 'file'));
     launchStatusList
         .add(LaunchStatus(code: 'complete', name: 'Complete', key: 'file'));
     launchStatusList
@@ -164,18 +173,22 @@ class RoomsProvider extends ChangeNotifier {
     launchStatusList
         .add(LaunchStatus(code: 'none', name: 'Not sent', key: 'none'));
     launchStatusList.add(
-        LaunchStatus(code: 'noneInProgress', name: 'In Progress', key: 'none'));
+        LaunchStatus(code: 'noneinprogress', name: 'In Progress', key: 'none'));
     launchStatusList
         .add(LaunchStatus(code: 'nonecomplete', name: 'Complete', key: 'none'));
     launchStatusList
         .add(LaunchStatus(code: 'nonehold', name: 'On Hold', key: 'none'));
 
+    launchStatusList.add(
+        LaunchStatus(code: 'esignnotsent', name: 'Not sent', key: 'esign'));
     launchStatusList.add(LaunchStatus(
         code: 'esigninprogress', name: 'In Progress', key: 'esign'));
     launchStatusList.add(
         LaunchStatus(code: 'esigncanceled', name: 'Canceled', key: 'esign'));
     launchStatusList.add(
         LaunchStatus(code: 'esigncomplete', name: 'Complete', key: 'esign'));
+    launchStatusList
+        .add(LaunchStatus(code: 'esignexpired', name: 'Expired', key: 'esign'));
     // notifyListeners();
   }
 
@@ -209,13 +222,14 @@ class RoomsProvider extends ChangeNotifier {
   Employer? _selectedEmployer;
   Employer? get selectedEmployer => _selectedEmployer;
 
-  /*  bool _readingRooms = false;
-  bool get readingRooms => _readingRooms;
+  String _actionItemText = 'My Action Items';
+  String get actionItemText => _actionItemText;
 
-  set readingRooms(bool obj) {
-    _readingRooms = obj;
+  set actionItemText(String obj) {
+    _actionItemText = obj;
     notifyListeners();
-  } */
+  }
+
   bool readingRooms = false;
 
   Future<void> clearEmployees() async {
@@ -256,6 +270,7 @@ class RoomsProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       employerAssistList.clear();
+      notifyListeners();
     }
   }
 
@@ -344,6 +359,15 @@ class RoomsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // From and To data
+  String _toDotooltip = '';
+  String get toDotooltip => _toDotooltip;
+
+  set toDotooltip(String val) {
+    _toDotooltip = val;
+    notifyListeners();
+  }
+
   EmployerAssist? _selectedFromAssist;
   EmployerAssist? get selectedFromAssist => _selectedFromAssist;
   EmployerAssist? _selectedToAssist;
@@ -355,8 +379,23 @@ class RoomsProvider extends ChangeNotifier {
         (_selectedToAssist!.account.accountcode ==
             _selectedFromAssist!.account.accountcode)) {
       _selectedVisibilityStatus = true;
+      _toDotooltip =
+          "If you uncheck Private, then the item will be visible to other users within your company";
     } else {
       _selectedVisibilityStatus = false;
+    }
+    if (_selectedToAssist != null &&
+        _selectedToAssist!.account.companydomainname ==
+            _selectedFromAssist!.account.companydomainname &&
+        (_selectedToAssist!.account.accountcode !=
+            _selectedFromAssist!.account.accountcode)) {
+      _toDotooltip =
+          "Private items will be visible only to the Sender and Receiver within your company";
+    } else if (_selectedToAssist != null &&
+        _selectedToAssist!.account.companydomainname !=
+            _selectedFromAssist!.account.companydomainname) {
+      _toDotooltip =
+          "Private items will be visible only to the Sender, Receiver and the Advisor";
     }
     notifyListeners();
   }
@@ -367,10 +406,34 @@ class RoomsProvider extends ChangeNotifier {
         (_selectedToAssist!.account.accountcode ==
             _selectedFromAssist!.account.accountcode)) {
       _selectedVisibilityStatus = true;
+      _toDotooltip =
+          "If you uncheck Private, then the item will be visible to other users within your company";
     } else {
       _selectedVisibilityStatus = false;
     }
+    if (_selectedFromAssist != null &&
+        _selectedToAssist!.account.companydomainname ==
+            _selectedFromAssist!.account.companydomainname &&
+        (_selectedToAssist!.account.accountcode !=
+            _selectedFromAssist!.account.accountcode)) {
+      _toDotooltip =
+          "Private items will be visible only to the Sender and Receiver within your company";
+    } else if (_selectedFromAssist != null &&
+        _selectedToAssist!.account.companydomainname !=
+            _selectedFromAssist!.account.companydomainname) {
+      _toDotooltip =
+          "Private items will be visible only to the Sender, Receiver and the Advisor";
+    }
+
     notifyListeners();
+  }
+
+  Future<void> sendAssignmentEmail(NewActionItemMail obj) async {
+    try {
+      await HttpService().sendEmailForNewActionItem(obj);
+      notifyListeners();
+    } catch (e) {
+    } finally {}
   }
 
   // Adding action
@@ -394,21 +457,32 @@ class RoomsProvider extends ChangeNotifier {
       actionlaunchpacks[index].filename = file.name;
       actionlaunchpacks[index].fileextension = fileext;
       actionlaunchpacks[index].filebase64 = encoded;
+      actionlaunchpacks[index].contentmimetype = file.type;
+
       notifyListeners();
     }
   }
 
+  bool _newActionItem = false;
+  bool get newActionItem => _newActionItem;
+  set newActionItem(bool obj) {
+    _newActionItem = obj;
+    notifyListeners();
+  }
+
   Future<void> addActionLaunchPack() async {
     if (_actionlaunchpacks.isEmpty) {
+      _newActionItem = true;
       _actionlaunchpacks.add(ActionLaunchPack(
           filebase64: '',
           fileextension: '',
           filename: '',
           formcode: '',
           formname: '',
-          attachmenttype: 'file',
+          attachmenttype: 'none',
           esigndocumentdata:
-              ESignDocument(esigndocumentid: '', formdefinitionid: '')));
+              ESignDocument(esigndocumentid: '', formdefinitionid: ''),
+          newAction: true));
     }
 
     notifyListeners();
@@ -427,13 +501,14 @@ class RoomsProvider extends ChangeNotifier {
       await HttpService().addAction(obj).then((value) {
         ActionLaunchPack? retObj = value?.formfileupload[0];
         _actionlaunchpacks[index].filebase64 = retObj!.filebase64;
-
         _actionlaunchpacks[index].filename = retObj.filename;
         _actionlaunchpacks[index].formcode = retObj.formcode;
         _actionlaunchpacks[index].formname = retObj.formname;
         _actionlaunchpacks[index].fileextension = retObj.fileextension;
         _actionlaunchpacks[index].launchpack = retObj.launchpack;
         _actionlaunchpacks[index].renewalpack = retObj.renewalpack;
+        _actionlaunchpacks[index].attachmenttype = retObj.attachmenttype;
+        _actionlaunchpacks[index].esigndocumentdata = retObj.esigndocumentdata;
       });
 
       savingLaunchPack = false;

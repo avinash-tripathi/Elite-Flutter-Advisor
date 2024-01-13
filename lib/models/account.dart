@@ -26,6 +26,7 @@ class Account {
   String invitationstatus;
   bool validlicense;
   String fancyname;
+  bool validpaymentmethodexist;
 
   Account({
     this.accountcode = '0',
@@ -51,6 +52,7 @@ class Account {
     this.invitationstatus = '',
     this.validlicense = false,
     this.fancyname = '',
+    this.validpaymentmethodexist = false,
   });
 
   factory Account.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,10 @@ class Account {
           ? true
           : false,
       fancyname: json['fancyname'] ?? '',
+      validpaymentmethodexist:
+          (json['validpaymentmethodexist'].toString().toUpperCase() == "TRUE")
+              ? true
+              : false,
     );
   }
   Map toMap() {

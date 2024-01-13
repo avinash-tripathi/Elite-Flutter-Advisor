@@ -1,21 +1,22 @@
 import 'dart:typed_data';
 import 'package:advisorapp/models/admin/paymentmethod/invoice.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/widgets.dart';
 import 'package:printing/printing.dart';
+import 'package:flutter/material.dart' as fw;
 
 Future<Uint8List> generateInvoice(
-    PdfPageFormat pageFormat, List<Invoice> invoices) async {
-  final products = invoices;
+    PdfPageFormat pageFormat, Invoice invoices) async {
+  final invoicetoprint = invoices;
 
   final invoice = PrintInvoice(
     invoiceNumber: '',
-    products: products,
-    customerName: products[0].createdbydata!.accountname,
+    invoicetoprint: invoicetoprint,
+    customerName: invoicetoprint.createdbydata!.accountname,
     customerAddress:
-        '${products[0].createdbydata!.companyname}\n${products[0].createdbydata!.companyaddress}',
+        '${invoicetoprint.createdbydata!.companyname}\n${invoicetoprint.createdbydata!.companyaddress}',
     paymentInfo: '',
     tax: 0,
     baseColor: PdfColors.teal,
@@ -27,7 +28,7 @@ Future<Uint8List> generateInvoice(
 
 class PrintInvoice {
   PrintInvoice({
-    required this.products,
+    required this.invoicetoprint,
     required this.customerName,
     required this.customerAddress,
     required this.invoiceNumber,
@@ -37,7 +38,7 @@ class PrintInvoice {
     required this.accentColor,
   });
 
-  final List<Invoice> products;
+  final Invoice invoicetoprint;
   final String customerName;
   final String customerAddress;
   final String invoiceNumber;
@@ -53,9 +54,10 @@ class PrintInvoice {
 
   PdfColor get _accentTextColor => baseColor.isLight ? _lightColor : _darkColor;
 
-  double get _total => products
+  /* double get _total => invoicetoprint
       .map<double>((p) => double.parse(p.total))
-      .reduce((a, b) => a + b);
+      .reduce((a, b) => a + b); */
+  double get _total => double.parse(invoicetoprint.total);
 
   double get _grandTotal => _total * (1 + tax);
 
@@ -65,15 +67,15 @@ class PrintInvoice {
 
   Future<Uint8List> buildPdf(PdfPageFormat pageFormat) async {
     // Create a PDF document.
-    final doc = pw.Document();
+    final doc = Document();
 
-    _logo = await rootBundle.loadString('assets/AdvisorLogo_Transparent.svg');
+    _logo = await rootBundle.loadString('assets/ALICORNCyan.svg');
     _bgShape =
         await rootBundle.loadString('assets/AdvisorLogo_Transparent.svg');
 
     // Add page to the PDF
     doc.addPage(
-      pw.MultiPage(
+      MultiPage(
         pageTheme: _buildTheme(
           pageFormat,
           await PdfGoogleFonts.robotoRegular(),
@@ -81,14 +83,15 @@ class PrintInvoice {
           await PdfGoogleFonts.robotoItalic(),
         ),
         header: _buildHeader,
-        //footer: _buildFooter,
+        footer: _buildFooter,
         build: (context) => [
           _contentHeader(context),
+          Divider(color: PdfColors.white),
           _contentTable(context),
-          pw.SizedBox(height: 20),
+          SizedBox(height: 20),
           _contentFooter(context),
-          pw.SizedBox(height: 20),
-          // _termsAndConditions(context),
+          SizedBox(height: 20),
+          //_termsAndConditions(context),
         ],
       ),
     );
@@ -97,100 +100,226 @@ class PrintInvoice {
     return doc.save();
   }
 
-  pw.Widget _buildHeader(pw.Context context) {
-    return pw.Column(
+  Widget _buildHeader(Context context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            pw.Expanded(
-              child: pw.Column(
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  pw.Container(
-                    height: 50,
-                    padding: const pw.EdgeInsets.only(left: 20),
-                    alignment: pw.Alignment.centerLeft,
-                    child: pw.Text(
-                      'INVOICE',
-                      style: pw.TextStyle(
-                        color: baseColor,
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 25,
-                      ),
-                    ),
-                  ),
-                  pw.Container(
-                    decoration: pw.BoxDecoration(
-                      borderRadius:
-                          const pw.BorderRadius.all(pw.Radius.circular(2)),
-                      color: accentColor,
-                    ),
-                    padding: const pw.EdgeInsets.only(
-                        left: 40, top: 10, bottom: 10, right: 20),
-                    alignment: pw.Alignment.centerLeft,
-                    height: 50,
-                    child: pw.DefaultTextStyle(
-                      style: pw.TextStyle(
-                        color: _accentTextColor,
-                        fontSize: 12,
-                      ),
-                      child: pw.GridView(
-                        crossAxisCount: 2,
-                        children: [
-                          /*  pw.Text('Invoice #'),
-                          pw.Text(invoiceNumber), */
-                          pw.Text('Recharge Date:'),
-                          /* pw.Text(_formatDate(DateTime.now())), */
-                          pw.Text(products[0].paidon),
-                        ],
-                      ),
-                    ),
+                  Container(
+                    alignment: Alignment.topLeft,
+                    height: 110,
+                    padding: const EdgeInsets.only(top: 10),
+                    child: _logo != null ? SvgImage(svg: _logo!) : PdfLogo(),
                   ),
                 ],
               ),
             ),
-            pw.Expanded(
-              child: pw.Column(
-                mainAxisSize: pw.MainAxisSize.min,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  pw.Container(
-                    alignment: pw.Alignment.topRight,
-                    padding: const pw.EdgeInsets.only(bottom: 8, left: 30),
-                    height: 72,
-                    child:
-                        _logo != null ? pw.SvgImage(svg: _logo!) : pw.PdfLogo(),
+                  Container(
+                    height: 40,
+                    padding: const EdgeInsets.only(bottom: 8, left: 30),
+                    alignment: Alignment.topRight,
+                    child: Text(
+                      'INVOICE',
+                      style: TextStyle(
+                        //color: baseColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25,
+                      ),
+                    ),
                   ),
-                  // pw.Container(
-                  //   color: baseColor,
-                  //   padding: pw.EdgeInsets.only(top: 3),
-                  // ),
+                  Container(
+                    padding: const EdgeInsets.only(left: 20),
+                    alignment: Alignment.topRight,
+                    height: 90,
+                    child: DefaultTextStyle(
+                      style: const TextStyle(
+                        fontSize: 12,
+                      ),
+                      child: buildAlicornAddressInfo(),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
-        if (context.pageNumber > 1) pw.SizedBox(height: 20)
+        Divider(color: accentColor),
+        if (context.pageNumber > 1) SizedBox(height: 10)
       ],
     );
   }
 
-  /*  pw.Widget _buildFooter(pw.Context context) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: pw.CrossAxisAlignment.end,
+  static Widget buildBillToInfo(Invoice info) {
+    final invoiceTitles = <String>['Invoice Number:', 'Invoice Date: '];
+    final invoiceData = <String>[info.invoicenumber, info.paidon];
+
+    final titles = <String>[
+      'BILL TO',
+      info.createdbydata!.companyname,
+      '${info.createdbydata!.accountname} ${info.createdbydata!.lastname}',
+      info.createdbydata!.companyaddress,
+      ' ',
+      info.createdbydata!.workemail,
+    ];
+    final titleStyles = <TextStyle>[
+      TextStyle(fontWeight: FontWeight.bold, color: PdfColors.grey700),
+      TextStyle(fontWeight: FontWeight.bold),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+    ];
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(titles.length, (index) {
+              final title = titles[index];
+              final titlestyle = titleStyles[index];
+              return buildAddressText(
+                  title: title,
+                  width: 200,
+                  titleStyle: titlestyle,
+                  textAlign: TextAlign.left);
+            }),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(invoiceData.length, (index) {
+              final invNumber = invoiceTitles[index];
+              final invVal = invoiceData[index];
+              return buildText(
+                title: invNumber,
+                value: invVal,
+                width: 200,
+              );
+            }),
+          )
+        ]);
+  }
+
+  static Widget buildAlicornAddressInfo() {
+    final titles = <String>[
+      'ALICORN INC.',
+      '3401 Annandale Road',
+      'Falls Church, Virginia',
+      '22042',
+      'United States',
+      '202-276-3074',
+      'alicorn.co'
+    ];
+    final titleStyles = <TextStyle>[
+      TextStyle(fontWeight: FontWeight.bold),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+      TextStyle(fontWeight: FontWeight.normal),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(titles.length, (index) {
+        final title = titles[index];
+        final titlestyle = titleStyles[index];
+        return buildAddressText(
+            title: title, width: 200, titleStyle: titlestyle);
+      }),
+    );
+  }
+
+  static Widget buildInvoiceInfo(Invoice info) {
+    final titles = <String>[
+      'Invoice #:',
+      'Invoice Date:',
+    ];
+    final data = <String>[
+      '1111',
+      info.paidon,
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(titles.length, (index) {
+        final title = titles[index];
+        final value = data[index];
+
+        return buildText(title: title, value: value, width: 200);
+      }),
+    );
+  }
+
+  static buildAddressText({
+    required String title,
+    double width = double.infinity,
+    TextStyle? titleStyle,
+    bool unite = false,
+    TextAlign? textAlign,
+  }) {
+    final style = titleStyle ?? TextStyle(fontWeight: FontWeight.bold);
+    final align = textAlign ?? TextAlign.right;
+
+    return Container(
+      width: width,
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: style, textAlign: align)),
+          // Text(value, style: unite ? style : null),
+        ],
+      ),
+    );
+  }
+
+  static buildText({
+    required String title,
+    required String value,
+    double width = double.infinity,
+    TextStyle? titleStyle,
+    bool unite = false,
+  }) {
+    final style = titleStyle ?? TextStyle(fontWeight: FontWeight.bold);
+
+    return Container(
+      width: width,
+      child: Row(
+        children: [
+          Expanded(child: Text(title, style: style)),
+          Text(value, style: unite ? style : null),
+        ],
+      ),
+    );
+  }
+
+  /*  Widget _buildFooter( Context context) {
+    return  Row(
+      mainAxisAlignment:  MainAxisAlignment.spaceBetween,
+      crossAxisAlignment:  CrossAxisAlignment.end,
       children: [
-        pw.Container(
+         Container(
           height: 20,
           width: 100,
-          child: pw.BarcodeWidget(
-            barcode: pw.Barcode.pdf417(),
+          child:  BarcodeWidget(
+            barcode:  Barcode.pdf417(),
             data: 'Invoice# $invoiceNumber',
             drawText: false,
           ),
         ),
-        pw.Text(
+         Text(
           'Page ${context.pageNumber}/${context.pagesCount}',
-          style: const pw.TextStyle(
+          style: const  TextStyle(
             fontSize: 12,
             color: PdfColors.white,
           ),
@@ -198,167 +327,59 @@ class PrintInvoice {
       ],
     );
   } */
+  Widget _buildFooter(Context context) {
+    return _termsAndConditions(context);
+  }
 
-  pw.PageTheme _buildTheme(
-      PdfPageFormat pageFormat, pw.Font base, pw.Font bold, pw.Font italic) {
-    return pw.PageTheme(
+  PageTheme _buildTheme(
+      PdfPageFormat pageFormat, Font base, Font bold, Font italic) {
+    return PageTheme(
       pageFormat: pageFormat,
-      theme: pw.ThemeData.withFont(
+      theme: ThemeData.withFont(
         base: base,
         bold: bold,
         italic: italic,
       ),
-      /* buildBackground: (context) => pw.FullPage(
+      /* buildBackground: (context) =>  FullPage(
         ignoreMargins: true,
-        child: pw.SvgImage(svg: _bgShape!),
+        child:  SvgImage(svg: _bgShape!),
       ), */
     );
   }
 
-  pw.Widget _contentHeader(pw.Context context) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        /* pw.Expanded(
-          child: pw.Container(
-            margin: const pw.EdgeInsets.symmetric(horizontal: 20),
-            height: 70,
-            child: pw.FittedBox(
-              child: pw.Text(
-                'Total: ${_formatCurrency(_grandTotal)}',
-                style: pw.TextStyle(
-                  color: baseColor,
-                  fontStyle: pw.FontStyle.italic,
-                ),
-              ),
-            ),
-          ),
-        ), */
-        pw.Expanded(
-          child: pw.Row(
-            children: [
-              pw.Container(
-                margin: const pw.EdgeInsets.only(left: 10, right: 10),
-                height: 70,
-                child: pw.Text(
-                  'Invoice to:',
-                  style: pw.TextStyle(
-                    color: _darkColor,
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              pw.Expanded(
-                child: pw.Container(
-                  height: 70,
-                  child: pw.RichText(
-                      text: pw.TextSpan(
-                          text: '$customerName\n',
-                          style: pw.TextStyle(
-                            color: _darkColor,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          children: [
-                        const pw.TextSpan(
-                          text: '\n',
-                          style: pw.TextStyle(
-                            fontSize: 5,
-                          ),
-                        ),
-                        pw.TextSpan(
-                          text: customerAddress,
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.normal,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ])),
-                ),
-              ),
-            ],
-          ),
-        ),
-        /* pw.Expanded(
-          child: pw.Row(
-            children: [
-              pw.Container(
-                margin: const pw.EdgeInsets.only(left: 10, right: 10),
-                height: 70,
-                child: pw.Text(
-                  'Invoice from:',
-                  style: pw.TextStyle(
-                    color: _darkColor,
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              pw.Expanded(
-                child: pw.Container(
-                  height: 70,
-                  child: pw.RichText(
-                      text: pw.TextSpan(
-                          text: '$customerName\n',
-                          style: pw.TextStyle(
-                            color: _darkColor,
-                            fontWeight: pw.FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          children: [
-                        const pw.TextSpan(
-                          text: '\n',
-                          style: pw.TextStyle(
-                            fontSize: 5,
-                          ),
-                        ),
-                        pw.TextSpan(
-                          text: customerAddress,
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.normal,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ])),
-                ),
-              ),
-            ],
-          ),
-        ), */
-      ],
-    );
+  Widget _contentHeader(Context context) {
+    return buildBillToInfo(invoicetoprint);
   }
 
-  pw.Widget _contentFooter(pw.Context context) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+  Widget _contentFooter(Context context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        pw.Expanded(
+        Expanded(
           flex: 2,
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /* pw.Text(
+              /*  Text(
                 'Thank you for your business',
-                style: pw.TextStyle(
+                style:  TextStyle(
                   color: _darkColor,
-                  fontWeight: pw.FontWeight.bold,
+                  fontWeight:  FontWeight.bold,
                 ),
               ), */
-              /* pw.Container(
-                margin: const pw.EdgeInsets.only(top: 20, bottom: 8),
-                child: pw.Text(
+              /*  Container(
+                margin: const  EdgeInsets.only(top: 20, bottom: 8),
+                child:  Text(
                   'Payment Info:',
-                  style: pw.TextStyle(
+                  style:  TextStyle(
                     color: baseColor,
-                    fontWeight: pw.FontWeight.bold,
+                    fontWeight:  FontWeight.bold,
                   ),
                 ),
               ),
-              pw.Text(
+               Text(
                 paymentInfo,
-                style: const pw.TextStyle(
+                style: const  TextStyle(
                   fontSize: 8,
                   lineSpacing: 5,
                   color: _darkColor,
@@ -367,47 +388,44 @@ class PrintInvoice {
             ],
           ),
         ),
-        pw.Expanded(
+        Expanded(
           flex: 1,
-          child: pw.DefaultTextStyle(
-            style: const pw.TextStyle(
+          child: DefaultTextStyle(
+            style: const TextStyle(
               fontSize: 10,
               color: _darkColor,
             ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /* pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('Sub Total:'),
-                    pw.Text(_formatCurrency(_total)),
+                    Text('Subtotal:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(_formatCurrency(
+                        double.parse(invoicetoprint.totalfees))),
                   ],
-                ), */
-                pw.SizedBox(height: 5),
-                /* pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                ),
+                Divider(thickness: .5, color: accentColor),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('Tax:'),
-                    pw.Text('${(tax * 100).toStringAsFixed(1)}%'),
+                    Text('Total:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(_formatCurrency(
+                        double.parse(invoicetoprint.totalfees))),
                   ],
-                ), */
-                pw.Divider(color: accentColor),
-                pw.DefaultTextStyle(
-                  style: pw.TextStyle(
-                    color: baseColor,
-                    fontSize: 14,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text('Total:'),
-                      /*  pw.Text(_formatCurrency(_grandTotal)), */
-                      pw.Text(
-                          _formatCurrency(double.parse(products[0].totalfees))),
-                    ],
-                  ),
+                ),
+                Divider(thickness: .5, color: accentColor),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Amount Paid:\n(USD):',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(_formatCurrency(
+                        double.parse(invoicetoprint.totalfees))),
+                  ],
                 ),
               ],
             ),
@@ -417,82 +435,89 @@ class PrintInvoice {
     );
   }
 
-  pw.Widget _termsAndConditions(pw.Context context) {
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.end,
+  Widget _termsAndConditions(Context context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        pw.Expanded(
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Container(
-                decoration: pw.BoxDecoration(
-                  border: pw.Border(top: pw.BorderSide(color: accentColor)),
-                ),
-                padding: const pw.EdgeInsets.only(top: 10, bottom: 4),
-                child: pw.Text(
-                  'Terms & Conditions',
-                  style: pw.TextStyle(
-                    fontSize: 12,
-                    color: baseColor,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
+        Expanded(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Notes / Terms',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
               ),
-              pw.Text(
-                pw.LoremText().paragraph(40),
-                textAlign: pw.TextAlign.justify,
-                style: const pw.TextStyle(
-                  fontSize: 6,
-                  lineSpacing: 2,
-                  color: _darkColor,
-                ),
+            ),
+            Text(
+              '1. The fees are charged by ALICORN for all active users on the last day of each month. Account owner(s) can terminate any or all users before the last day of the month and not incur any fees. There are no refunds once the fee is charged.',
+              maxLines: 3,
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontSize: 12,
+                color: _darkColor,
               ),
-            ],
-          ),
-        ),
-        pw.Expanded(
-          child: pw.SizedBox(),
-        ),
+            ),
+            Text(
+              '2. A list of active users is available to the account owner(s) in the admin section.',
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontSize: 12,
+                color: _darkColor,
+              ),
+            ),
+            Text(
+              '3. Please email support@alicorn.co if you have any questions.',
+              textAlign: TextAlign.justify,
+              style: const TextStyle(
+                fontSize: 12,
+                color: _darkColor,
+              ),
+            ),
+          ],
+        )),
       ],
     );
   }
 
-  pw.Widget _contentTable(pw.Context context) {
+  Widget _contentTable(Context context) {
     const tableHeaders = [
       'Total Users',
       'Fees/user/month',
       'Total subscription fees',
       'Recharge by'
     ];
+    const tableTitles = ['Items', 'Quantity', 'Price', 'Amount'];
 
-    return pw.TableHelper.fromTextArray(
+    return TableHelper.fromTextArray(
       border: null,
-      cellAlignment: pw.Alignment.centerLeft,
-      headerDecoration: pw.BoxDecoration(
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-        color: baseColor,
+      cellAlignment: Alignment.centerLeft,
+      headerDecoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(2)),
+        //color: baseColor,
+        color: PdfColors.cyan,
       ),
       headerHeight: 25,
       cellHeight: 40,
       cellAlignments: {
-        0: pw.Alignment.center,
-        1: pw.Alignment.center,
-        2: pw.Alignment.center,
-        3: pw.Alignment.center,
+        0: Alignment.topLeft,
+        1: Alignment.topCenter,
+        2: Alignment.topCenter,
+        3: Alignment.topRight,
       },
-      headerStyle: pw.TextStyle(
+      headerStyle: TextStyle(
         color: _baseTextColor,
         fontSize: 10,
-        fontWeight: pw.FontWeight.bold,
+        fontWeight: FontWeight.bold,
       ),
-      cellStyle: const pw.TextStyle(
+      cellStyle: const TextStyle(
         color: _darkColor,
         fontSize: 10,
       ),
-      rowDecoration: pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(
+      rowDecoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
             color: accentColor,
             width: .5,
           ),
@@ -500,13 +525,13 @@ class PrintInvoice {
       ),
       headers: List<String>.generate(
         tableHeaders.length,
-        (col) => tableHeaders[col],
+        (col) => tableTitles[col],
       ),
       data: List<List<dynamic>>.generate(
-        products.length,
+        1,
         (row) => List<dynamic>.generate(
           tableHeaders.length,
-          (col) => products[row].getIndex(col),
+          (col) => invoicetoprint.getIndex(col),
         ),
       ),
     );
@@ -515,9 +540,4 @@ class PrintInvoice {
 
 String _formatCurrency(double amount) {
   return '\$${amount.toStringAsFixed(2)}';
-}
-
-String _formatDate(DateTime date) {
-  final format = DateFormat.yMMMd('en_US');
-  return format.format(date);
 }

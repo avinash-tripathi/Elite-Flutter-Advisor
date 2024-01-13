@@ -17,6 +17,7 @@ import 'package:advisorapp/providers/image_provider.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/master_provider.dart';
 import 'package:advisorapp/providers/room_provider.dart';
+
 import 'package:advisorapp/style/colors.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,9 @@ class CompanyProfile extends StatelessWidget {
     SizeConfig().init(context);
     final formkey = GlobalKey<FormState>();
     final scaffoldKey = GlobalKey<ScaffoldState>();
+    final prvRoom = Provider.of<RoomsProvider>(context, listen: false);
+    final lgnProvider = Provider.of<LoginProvider>(context, listen: false);
+    prvRoom.readRooms(lgnProvider.logedinUser.workemail);
 
     return Scaffold(
         key: scaffoldKey,
@@ -72,10 +76,10 @@ class CompanyProfile extends StatelessWidget {
                           //displayEntryForm()
                           (loginProvider.logedinUser.companyname.isEmpty &&
                                   loginProvider.adding)
-                              ? displayEntryForm(context)
+                              ? displayEntryForm(context, formkey)
                               : const Text(''),
                           (loginProvider.logedinUser.companyname.isNotEmpty)
-                              ? displayEntryForm(context)
+                              ? displayEntryForm(context, formkey)
                               : const Text(''),
                         ],
                       ),
@@ -117,7 +121,7 @@ class CompanyProfile extends StatelessWidget {
         ));
   }
 
-  displayEntryForm(BuildContext context) {
+  displayEntryForm(BuildContext context, GlobalKey<FormState> formkey) {
     double screenWidth = SizeConfig.screenWidth / 2;
     String? _companycategory = '', _companytype = '', _paymentinfo = '';
 
@@ -148,6 +152,9 @@ class CompanyProfile extends StatelessWidget {
 
     Payment objpayment =
         prvMaster.payments.firstWhere((e) => e.paymentcode == 'select');
+    Naics defaultNaicsCode =
+        loginProvider.naicscodes.firstWhere((e) => e.naicscode == "00000");
+
     Naics? selectedNaicsCode;
 
     if (loginProvider.cachedAccount == null) {
@@ -155,10 +162,10 @@ class CompanyProfile extends StatelessWidget {
         selectedNaicsCode = loginProvider.naicscodes.firstWhere(
             (e) => e.naicscode == loginProvider.logedinUser.naicscode);
       } catch (e) {
-        selectedNaicsCode = null;
+        selectedNaicsCode = defaultNaicsCode;
       }
       loginProvider.naicscodeController.text =
-          selectedNaicsCode.isNull ? '' : selectedNaicsCode!.title;
+          selectedNaicsCode.isNull ? '' : selectedNaicsCode.title;
 
       loginProvider.companydomainController.text =
           loginProvider.logedinUser.companydomainname;
@@ -197,10 +204,10 @@ class CompanyProfile extends StatelessWidget {
         selectedNaicsCode = loginProvider.naicscodes.firstWhere(
             (e) => e.naicscode == loginProvider.logedinUser.naicscode);
       } catch (e) {
-        selectedNaicsCode = null;
+        selectedNaicsCode = defaultNaicsCode;
       }
       loginProvider.naicscodeController.text =
-          selectedNaicsCode.isNull ? '' : selectedNaicsCode!.title;
+          selectedNaicsCode.isNull ? '' : selectedNaicsCode.title;
 
       loginProvider.companydomainController.text =
           loginProvider.cachedAccount!.companydomainname;
@@ -237,6 +244,10 @@ class CompanyProfile extends StatelessWidget {
             .firstWhere((e) => e.paymentcode == 'PC-20230424161840147');
       }
     }
+    final FocusNode _firstFocusNode = FocusNode();
+    final FocusNode _secondFocusNode = FocusNode();
+
+    final FocusNode _thirdFocusNode = FocusNode();
 
     return SingleChildScrollView(
       child: Column(
@@ -292,6 +303,7 @@ class CompanyProfile extends StatelessWidget {
                   child: TextFormField(
                     readOnly: isAccountOwner,
                     //initialValue: loginProvider.logedinUser?.companyname,
+                    focusNode: _firstFocusNode,
                     controller: loginProvider.companynameController,
                     keyboardType: TextInputType.text,
                     decoration: CustomTextDecoration.textDecoration(
@@ -309,6 +321,10 @@ class CompanyProfile extends StatelessWidget {
                     },
                     onChanged: (value) {
                       loginProvider.logedinUser.companyname = value;
+                    },
+                    onEditingComplete: () {
+                      _firstFocusNode.unfocus();
+                      FocusScope.of(context).requestFocus(_secondFocusNode);
                     },
                   ),
                 ),
@@ -334,6 +350,7 @@ class CompanyProfile extends StatelessWidget {
                     message:
                         "Please enter the number without any - or space.\nAn Employer Identification Number (EIN), also known as a Federal Tax Identification Number,\nis used to identify a business entity.",
                     child: TextFormField(
+                      focusNode: _secondFocusNode,
                       controller: loginProvider.eincodeController,
                       keyboardType: TextInputType.text,
                       decoration: CustomTextDecoration.textDecoration(
@@ -352,6 +369,10 @@ class CompanyProfile extends StatelessWidget {
                       onChanged: (value) {
                         loginProvider.logedinUser.eincode = value;
                       },
+                      onEditingComplete: () {
+                        _secondFocusNode.unfocus();
+                        FocusScope.of(context).requestFocus(_thirdFocusNode);
+                      },
                     ),
                   ),
                 ),
@@ -364,13 +385,19 @@ class CompanyProfile extends StatelessWidget {
             child: SizedBox(
                 width: screenWidth,
                 child: DropdownSearch<Naics>(
+                  autoValidateMode: AutovalidateMode.always,
                   items: loginProvider.naicscodes.toList(),
-                  dropdownBuilder: (context, selectedItem) {
+                  /*  dropdownBuilder: (context, selectedItem) {
+                   
                     loginProvider.naicscodeController.text =
-                        selectedItem == null ? 'Select' : selectedItem.title;
-                    return Text(
-                        selectedItem == null ? 'Select' : selectedItem.title);
-                  },
+                        selectedItem == null
+                            ? defaultNaicsCode.title
+                            : selectedItem.title;
+                    return Text(selectedItem == null
+                        ? defaultNaicsCode.title
+                        : selectedItem.title);
+                  }, */
+
                   selectedItem: selectedNaicsCode,
                   dropdownDecoratorProps: DropDownDecoratorProps(
                     dropdownSearchDecoration:
@@ -401,7 +428,9 @@ class CompanyProfile extends StatelessWidget {
                         child: ListTile(
                           selected: isSelected,
                           title: Text(objNaics.title),
-                          subtitle: Text(objNaics.naicscode),
+                          onTap: () {},
+
+                          //subtitle: Text(objNaics.naicscode),
                         ),
                       );
                     },
@@ -411,7 +440,9 @@ class CompanyProfile extends StatelessWidget {
                     ),
                   ),
                   onChanged: (value) {
-                    loginProvider.naicscodeController.text = value!.title;
+                    /* loginProvider.naicscodeController.text =
+                        '${value!.title}-${value.naicscode}'; */
+
                     loginProvider.selectedNAICSCode = value;
                   },
                 )),
@@ -757,11 +788,10 @@ class CompanyProfile extends StatelessWidget {
                           ? null
                           : () async {
                               try {
-                                /*  if (!formKey.currentState!.validate()) {
-                                  showSnackBar(
-                                      context, validationFailMessage);
+                                if (!formkey.currentState!.validate()) {
+                                  showSnackBar(context, validationFailMessage);
                                   return;
-                                } */
+                                }
 
                                 if (objCompanyType.typecode == 'select') {
                                   EliteDialog(

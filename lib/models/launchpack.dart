@@ -92,10 +92,9 @@ class LaunchPack {
         tocodedata: json['tocodedata'] != null
             ? Account.fromJson(json['tocodedata'][0])
             : null,
-        actionitemdata:
-            (json['actionitemdata'] != null || json['actionitemdata'] != '')
-                ? ActionLaunchPack.fromJson(json['actionitemdata'][0])
-                : null,
+        actionitemdata: (json['actionitemdata'] != null)
+            ? ActionLaunchPack.fromJson(json['actionitemdata'][0])
+            : null,
         attachmenttype: json['attachmenttype'] ?? '',
         accountowners: accountOwners,
         esigndocumentdata: esigndocument[0]);

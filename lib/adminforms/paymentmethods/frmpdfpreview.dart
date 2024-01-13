@@ -17,7 +17,8 @@ class FrmPdfPreview extends StatelessWidget {
       child: PdfPreview(
         maxPageWidth: 700,
         /* build: (format) => examples[_tab].builder(format, _data), */
-        build: (format) => generateInvoice(format, adminProvider.invoices),
+        build: (format) =>
+            generateInvoice(format, adminProvider.invoicetoprint),
         onPrinted: _showPrintedToast,
         onShared: _showSharedToast,
         allowSharing: false,

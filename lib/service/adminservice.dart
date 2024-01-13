@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:advisorapp/constants.dart';
+import 'package:advisorapp/models/account.dart';
+import 'package:advisorapp/models/admin/adminuser.dart';
 import 'package:advisorapp/models/admin/paymentmethod/attachedpaymentmethod.dart';
 import 'package:advisorapp/models/admin/paymentmethod/invoice.dart';
 import 'package:advisorapp/models/admin/subscription.dart';
@@ -9,7 +11,8 @@ import 'package:http/http.dart' as http;
 class AdminService {
   static const serviceURL = webApiserviceURL;
 
-  Future<dynamic> updateStatus(accountcode, userstatus) async {
+  Future<dynamic> updateStatus(
+      Account accountowner, Account account, userstatus) async {
     try {
       Uri uri = Uri.parse("${serviceURL}Advisor/UpdateAdvisorUpdateUserStatus");
       var objResponse = await http.Client().post(uri,
@@ -24,8 +27,11 @@ class AdminService {
                 "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
             "Access-Control-Allow-Methods": "POST, OPTIONS"
           },
-          body: json
-              .encode({"accountcode": accountcode, "userstatus": userstatus}));
+          body: json.encode({
+            "accountownerdata": accountowner,
+            "accountdata": account,
+            "userstatus": userstatus
+          }));
 
       if (objResponse.statusCode == 200) {
         return jsonDecode(objResponse.body);
@@ -152,6 +158,38 @@ class AdminService {
             customer: '',
             metadata: {},
           )); */
+    }
+  }
+
+  Future<List<AdminUser>> readAdminUsers() async {
+    try {
+      Uri uri = Uri.parse("${serviceURL}Advisor/ReadAdvisorAdminUserM");
+      var objResponse = await http.Client().post(uri,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Charset': 'utf-8',
+            "Access-Control-Allow-Origin":
+                "*", // Required for CORS support to work
+            "Access-Control-Allow-Credentials":
+                "true", // Required for cookies, authorization headers with HTTPS
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+          },
+          body: json.encode({"Status": "1"}));
+
+      List<AdminUser> list = [];
+      if (objResponse.statusCode == 200) {
+        list = (jsonDecode(objResponse.body) as List)
+            .map((slist) => AdminUser.fromJson(slist))
+            .toList();
+
+        return list;
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      return [];
     }
   }
 

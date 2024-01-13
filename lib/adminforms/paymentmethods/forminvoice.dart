@@ -17,6 +17,12 @@ class FormInvoice extends StatelessWidget {
             DataColumn(
               label: SizedBox(
                 width: SizeConfig.screenWidth / 12,
+                child: const Center(child: Text('Invoice Date')),
+              ),
+            ),
+            DataColumn(
+              label: SizedBox(
+                width: SizeConfig.screenWidth / 12,
                 child: const Center(child: Text('Total Users')),
               ),
             ),
@@ -34,16 +40,16 @@ class FormInvoice extends StatelessWidget {
                 ),
               ),
             ),
-            DataColumn(
+            /*  DataColumn(
               label: SizedBox(
                 width: SizeConfig.screenWidth / 10,
                 child: const Center(child: Text('Recharge by')),
               ),
-            ),
+            ), */
             DataColumn(
               label: SizedBox(
                 width: SizeConfig.screenWidth / 10,
-                child: const Center(child: Text('Download')),
+                child: const Center(child: Text('Invoice')),
               ),
             ),
           ],
@@ -52,26 +58,32 @@ class FormInvoice extends StatelessWidget {
             (index) => DataRow(cells: [
               DataCell(Center(
                 child: Text(
+                  prvAdmin.invoices[index].paidon,
+                ),
+              )),
+              DataCell(Center(
+                child: Text(
                   prvAdmin.invoices[index].total,
                 ),
               )),
               DataCell(Center(
-                child: Text("${prvAdmin.invoices[index].peruserlicensefee}\$"),
+                child: Text("\$${prvAdmin.invoices[index].peruserlicensefee}"),
               )),
               DataCell(
-                Center(child: Text("${prvAdmin.invoices[index].totalfees}\$")),
+                Center(child: Text("\$${prvAdmin.invoices[index].totalfees}")),
               ),
-              DataCell(
+              /*  DataCell(
                 Center(
                   child:
                       Text(prvAdmin.invoices[index].createdbydata!.accountname),
                 ),
-              ),
+              ), */
               DataCell(
                 Center(
                   child: IconButton(
                     onPressed: () {
                       prvAdmin.clickedTodownload = !prvAdmin.clickedTodownload;
+                      prvAdmin.invoicetoprint = prvAdmin.invoices[index];
                     },
                     icon: const Icon(
                       FontAwesomeIcons.filePdf,

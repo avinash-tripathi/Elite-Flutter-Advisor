@@ -1,4 +1,5 @@
 import 'package:advisorapp/component/sign_in_button/web.dart';
+import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/models/auth.dart';
 import 'package:advisorapp/providers/login_provider.dart';
 import 'package:advisorapp/providers/sidebar_provider.dart';
@@ -6,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:advisorapp/config/size_config.dart';
 
 class GoogleAuthWidget extends StatelessWidget {
   const GoogleAuthWidget({Key? key}) : super(key: key);
@@ -32,6 +32,11 @@ class GoogleAuthWidget extends StatelessWidget {
                             sideProv.selectedMenu = 'Account',
                             Navigator.pushNamed(context, "/companyProfile")
                           })
+                }
+              else
+                {
+                  showSnackBar(context,
+                      'You are not authorised to access Advisor. Please connect with Account Owner')
                 }
             });
       }

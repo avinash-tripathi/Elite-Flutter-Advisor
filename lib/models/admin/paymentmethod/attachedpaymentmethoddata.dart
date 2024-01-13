@@ -454,8 +454,8 @@ class Checks {
 
   factory Checks.fromJson(Map<String, dynamic> json) {
     return Checks(
-      addressLine1Check: json['addressLine1check'],
-      addressPostalCodeCheck: json['addressPostalCodeCheck'],
+      addressLine1Check: json['addressLine1Check'] ?? '',
+      addressPostalCodeCheck: json['addressPostalCodeCheck'] ?? '',
       cvcCheck: json['cvcCheck'],
     );
   }

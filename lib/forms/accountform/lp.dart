@@ -6,6 +6,7 @@ import 'package:advisorapp/constants.dart';
 import 'package:advisorapp/esignwidget/iframe.dart';
 
 import 'package:advisorapp/forms/room/employerinroom.dart';
+import 'package:advisorapp/messages.dart';
 import 'package:advisorapp/models/actionlaunchpack.dart';
 import 'package:advisorapp/models/attachmenttype.dart';
 import 'package:advisorapp/models/esign/eSignEmbeddedResponse.dart';
@@ -259,14 +260,25 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                         launchProvider
                                                                             .launchpacks[index]
                                                                             .attachmenttype),
-                                                                onChanged:
-                                                                    (newValue) {
-                                                                  launchProvider
-                                                                      .setAttachmentType(
-                                                                          index,
-                                                                          newValue!);
-                                                                  // add your code to handle the value change here
-                                                                },
+                                                                onChanged: !launchProvider
+                                                                        .launchpacks[
+                                                                            index]
+                                                                        .newAction
+                                                                    ? null
+                                                                    : (newValue) {
+                                                                        launchProvider.setAttachmentType(
+                                                                            index,
+                                                                            newValue!);
+                                                                        (newValue.code ==
+                                                                                "esign")
+                                                                            ? EliteDialog(
+                                                                                context,
+                                                                                'Alert',
+                                                                                esignAlert,
+                                                                                'Ok',
+                                                                                'Cancel')
+                                                                            : null;
+                                                                      },
                                                                 items: launchProvider
                                                                     .attachmentTypeList
                                                                     .map(
@@ -291,9 +303,13 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                 }).toList(),
                                                               ),
                                                               launchProvider
-                                                                      .launchpacks[
-                                                                          index]
-                                                                      .newAction
+                                                                          .launchpacks[
+                                                                              index]
+                                                                          .newAction &&
+                                                                      (launchProvider.launchpacks[index].attachmenttype ==
+                                                                              'esign' ||
+                                                                          launchProvider.launchpacks[index].attachmenttype ==
+                                                                              'file')
                                                                   ? IconButton(
                                                                       icon: const Icon(
                                                                           FontAwesomeIcons
@@ -325,7 +341,10 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                                   }
                                                                                 },
                                                                                 style: buttonStyleAmber,
-                                                                                icon: Image.asset('assets/ontask.png'),
+                                                                                icon: Image.asset(
+                                                                                  'assets/ontask.png',
+                                                                                  color: AppColors.iconGray,
+                                                                                ),
                                                                               ),
                                                                             )
                                                                           : const Text(
@@ -508,7 +527,7 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                         if ((launchProvider.launchpacks[index].attachmenttype == 'esign' ||
                                                                                 launchProvider.launchpacks[index].attachmenttype == 'file') &&
                                                                             launchProvider.launchpacks[index].fileextension.isEmpty) {
-                                                                          EliteDialog(
+                                                                          await EliteDialog(
                                                                               context,
                                                                               "Alert",
                                                                               "Please attach a document.",
@@ -516,6 +535,20 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                               "Cancel");
                                                                           return;
                                                                         }
+                                                                        if (launchProvider.launchpacks[index].attachmenttype ==
+                                                                                'esign' &&
+                                                                            launchProvider.launchpacks[index].formcode.isEmpty) {
+                                                                          bool consent = await EliteDialog(
+                                                                              context,
+                                                                              'Please confirm',
+                                                                              esignAlert,
+                                                                              'Proceed',
+                                                                              'Cancel');
+                                                                          if (!consent) {
+                                                                            return;
+                                                                          }
+                                                                        }
+
                                                                         List<ActionLaunchPack>
                                                                             lists =
                                                                             [];
@@ -536,16 +569,33 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                               accountcode,
                                                                               '',
                                                                               index);
-                                                                          launchProvider
+                                                                          /* launchProvider
                                                                               .launchpacks[index]
-                                                                              .newAction = false;
+                                                                              .newAction = false; */
 
                                                                           if (launchProvider
                                                                               .savedAccountAction!
                                                                               .accountcode
                                                                               .isNotEmpty) {
+                                                                            var docId =
+                                                                                launchProvider.launchpacks[index].esigndocumentdata.esigndocumentid;
+                                                                            var formdefinitionId =
+                                                                                launchProvider.launchpacks[index].esigndocumentdata.formdefinitionid;
+                                                                            ESignEmbeddedResponse
+                                                                                jsonData =
+                                                                                await launchProvider.generateESignEmbeddedURL(docId, formdefinitionId);
+                                                                            if (jsonData.url.toString().isNotEmpty &&
+                                                                                docId.isNotEmpty &&
+                                                                                formdefinitionId.isNotEmpty) {
+                                                                              // ignore: use_build_context_synchronously
+                                                                              await EliteDialog(context, "Success", "Data saved successfully! Please drag and drop the form fields to set up the document for signatures.", "Ok", "Close");
+                                                                              launchProvider.viewIframe = true;
+                                                                            }
+                                                                          }
+                                                                          if (launchProvider.launchpacks[index].attachmenttype !=
+                                                                              'esign') {
                                                                             // ignore: use_build_context_synchronously
-                                                                            EliteDialog(
+                                                                            await EliteDialog(
                                                                                 context,
                                                                                 "Success",
                                                                                 "Data saved successfully!",
@@ -553,10 +603,8 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                                 "Close");
                                                                           }
                                                                         }
-                                                                        if (launchProvider
-                                                                            .launchpacks[index]
-                                                                            .formcode
-                                                                            .isNotEmpty) {
+                                                                        if (launchProvider.launchpacks[index].formcode.isNotEmpty &&
+                                                                            !launchProvider.launchpacks[index].newAction) {
                                                                           await launchProvider.updateLaunchPack(
                                                                               accountcode,
                                                                               '',
@@ -582,6 +630,9 @@ class _LaunchPackDetailState extends State<LaunchPackDetail> {
                                                                             .savedAccountAction!
                                                                             .formfileupload[0]
                                                                             .formcode;
+                                                                        launchProvider
+                                                                            .launchpacks[index]
+                                                                            .newAction = false;
                                                                       } catch (e) {
                                                                         launchProvider.setAccountActionIndexSaved(
                                                                             index,

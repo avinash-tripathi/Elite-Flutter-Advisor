@@ -7,9 +7,9 @@ class Role {
       {required this.rolecode, required this.rolename, required this.roletype});
   factory Role.fromJson(Map<String, dynamic> json) {
     return Role(
-        rolecode: json['rolecode'],
-        rolename: json['rolename'],
-        roletype: json['roletype']);
+        rolecode: json['rolecode'] ?? '',
+        rolename: json['rolename'] ?? '',
+        roletype: json['roletype'] ?? '');
   }
   Map toMap() {
     var map = <String, dynamic>{};

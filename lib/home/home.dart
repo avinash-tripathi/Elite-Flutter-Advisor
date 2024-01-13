@@ -1,11 +1,9 @@
 import 'package:advisorapp/component/background.dart';
 import 'package:advisorapp/component/sidemenu.dart';
 import 'package:advisorapp/config/size_config.dart';
-
 import 'package:advisorapp/forms/room/employerinroom.dart';
 import 'package:advisorapp/forms/room/myroom.dart';
 import 'package:advisorapp/providers/login_provider.dart';
-
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,14 +13,6 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /*final loginProvider = Provider.of<LoginProvider>(context, listen: false);
-    final rProv = Provider.of<RoomsProvider>(context, listen: false);
-    if (rProv.employers.isEmpty) {
-      rProv.getInitialLaunchPack(
-          loginProvider.logedinUser.accountcode, '', 'Individual');
-      rProv.readRooms(loginProvider.logedinUser.workemail);
-    } */
-
     SizeConfig().init(context);
 
     return Background(

@@ -1,15 +1,14 @@
 import 'dart:html' as html;
-import 'package:advisorapp/providers/launch_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-
 import 'package:provider/provider.dart';
+import 'package:advisorapp/providers/room_provider.dart';
 
-class MyIframe extends StatelessWidget {
+class IframeRoom extends StatelessWidget {
   final String src;
 
-  const MyIframe({super.key, required this.src});
+  const IframeRoom({super.key, required this.src});
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +16,10 @@ class MyIframe extends StatelessWidget {
     ui.platformViewRegistry.registerViewFactory(
       src,
       (int viewId) {
-        /*  final l = Provider.of<LaunchProvider>(context, listen: false);
-        l.viewIframe = false; */
         final iframe = html.IFrameElement()
           ..width = '550'
           ..height = '650'
           ..style.border = 'none';
-
-        // Set the src dynamically
-        //iframe.src = 'https://www.youtube.com/embed/$youtubeVideoId';
         iframe.src = src;
         return iframe;
       },
@@ -44,8 +38,9 @@ class MyIframe extends StatelessWidget {
         ),
         IconButton(
             onPressed: () {
-              Provider.of<LaunchProvider>(context, listen: false).viewIframe =
-                  false;
+              final prv = Provider.of<RoomsProvider>(context, listen: false);
+              prv.esignembededdata = null;
+              prv.viewIframe = false;
             },
             icon: const Icon(
               Icons.close,

@@ -135,13 +135,20 @@ class MasterProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //Partner/Advisor Role
+  List<Role> _partnerroles = [];
+  List<Role> get partnerroles => _partnerroles;
+
   Future<void> getRoles() async {
     roleReading = true;
     _accountroles.clear();
     _employerroles.clear();
+    _partnerroles.clear();
     List<Role> roles = await HttpService().readRoleG();
     _accountroles = roles.where((obj) => obj.roletype == 'Account').toList();
     _employerroles = roles.where((obj) => obj.roletype == 'Employer').toList();
+    //Here _partner means data of both advisor and parter as both are same
+    _partnerroles = roles.where((obj) => obj.roletype == 'Partner').toList();
     roleReading = false;
     notifyListeners();
   }
@@ -159,7 +166,7 @@ class MasterProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getEmployerRoles() async {
+  Future<void> getEmployerRoless() async {
     _employerroles.clear();
     roleEmployerLoaded = true;
     List<Role> roles = await HttpService().readRole();

@@ -12,7 +12,6 @@ import 'package:advisorapp/providers/master_provider.dart';
 import 'package:advisorapp/providers/partner_provider.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_textfield_autocomplete/flutter_textfield_autocomplete.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -29,7 +28,7 @@ class SLEmployerForm extends StatelessWidget {
     double screenWidth = SizeConfig.screenWidth / 2.5;
     EdgeInsets paddingConfig = const EdgeInsets.all(4);
     List<Partner> selectedPartners = [];
-    final GlobalKey<TextFieldAutoCompleteState<String>> key = GlobalKey();
+    //final GlobalKey<TextFieldAutoCompleteState<String>> key = GlobalKey();
     var master = Provider.of<MasterProvider>(context, listen: false);
     final prvEntry = Provider.of<EmployerProvider>(context, listen: false);
     CompanyCategory objInviteWithCategory = master.companycategories
@@ -75,6 +74,14 @@ class SLEmployerForm extends StatelessWidget {
                         decoration: tooltipdecoration,
                         textStyle: const TextStyle(color: AppColors.black),
                         child: TextFormField(
+                          readOnly: (prvEntry.selectedEmployer!
+                                      .decisionmakeremailinvitationstatus
+                                      .toUpperCase() ==
+                                  'JOINED' ||
+                              prvEntry.selectedEmployer!
+                                      .decisionmakeremailinvitationstatus
+                                      .toUpperCase() ==
+                                  'INVITED'),
                           controller: prvEntry.decisionmakerController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: CustomTextDecoration.emailDecoration(
@@ -215,6 +222,14 @@ class SLEmployerForm extends StatelessWidget {
                         decoration: tooltipdecoration,
                         textStyle: const TextStyle(color: AppColors.black),
                         child: TextFormField(
+                          readOnly: (prvEntry.selectedEmployer!
+                                      .contractsignatoryemailinvitationstatus
+                                      .toUpperCase() ==
+                                  "INVITED" ||
+                              prvEntry.selectedEmployer!
+                                      .contractsignatoryemailinvitationstatus
+                                      .toUpperCase() ==
+                                  "JOINED"),
                           controller: prvEntry.contractsignatoryController,
                           keyboardType: TextInputType.emailAddress,
                           decoration: CustomTextDecoration.textDecoration(
@@ -359,21 +374,24 @@ class SLEmployerForm extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000, 8, 1),
-                            lastDate: DateTime(2101),
-                          );
-                          if (date != null) {
-                            prvEntry.planeffectiveDate = (date);
-                            prvEntry.planeffectivedateController.text =
-                                DateFormat('MM-dd-yyyy')
-                                    .format(date)
-                                    .toString();
-                          }
-                        },
+                        onPressed: prvEntry.selectedEmployer!.launchstatus ==
+                                'SENTLAUNCHPACK'
+                            ? null
+                            : () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2000, 8, 1),
+                                  lastDate: DateTime(2101),
+                                );
+                                if (date != null) {
+                                  prvEntry.planeffectiveDate = (date);
+                                  prvEntry.planeffectivedateController.text =
+                                      DateFormat('MM-dd-yyyy')
+                                          .format(date)
+                                          .toString();
+                                }
+                              },
                         icon: const Icon(
                           Icons.date_range_sharp,
                           color: AppColors.action,
@@ -598,7 +616,7 @@ class SLEmployerForm extends StatelessWidget {
                                       EliteDialog(
                                           context,
                                           "Warning",
-                                          "Please select at least one Partner!",
+                                          "Please make sure to invite and assign all partners to the employer.\nIf you don’t see a specific partner name then either you have not invited that partner or that partner has not joined the advisor platform yet.",
                                           "Ok",
                                           "Close");
 
