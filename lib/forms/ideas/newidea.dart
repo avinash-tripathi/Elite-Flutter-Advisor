@@ -216,34 +216,41 @@ class NewIdea extends StatelessWidget {
           isReadOnly
               ? const Text("")
               : SizedBox(
-                  width: 200,
+                  width: SizeConfig.screenWidth / 6,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ElevatedButton(
-                          style: buttonStyleBlue,
-                          onPressed: () async {
-                            if (formKey.currentState!.validate()) {
-                              Idea obj = idea;
-                              obj.topic = iProvider.ideaController.text;
-                              obj.topicdescription =
-                                  iProvider.descController.text;
-                              obj.createdby = lProv.logedinUser.accountcode;
-                              obj.createdbydata = lProv.logedinUser;
-                              await iProvider.addIdea(obj);
-                            }
-                          },
-                          child: const Text('Post'),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                            style: buttonStyleBlue,
+                            onPressed: () async {
+                              if (formKey.currentState!.validate()) {
+                                Idea obj = idea;
+                                obj.topic = iProvider.ideaController.text;
+                                obj.topicdescription =
+                                    iProvider.descController.text;
+                                obj.createdby = lProv.logedinUser.accountcode;
+                                obj.createdbydata = lProv.logedinUser;
+                                await iProvider.addIdea(obj);
+                                //iProvider.addNewIdea = false;
+                              }
+                            },
+                            child: const Text('Post'),
+                          ),
                         ),
-                        ElevatedButton(
-                          style: buttonStyleRed,
-                          onPressed: () {
-                            iProvider.addNewIdea = false;
-                          },
-                          child: const Text('Close'),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                            style: buttonStyleRed,
+                            onPressed: () {
+                              iProvider.addNewIdea = false;
+                            },
+                            child: const Text('Close'),
+                          ),
                         ),
                       ],
                     ),

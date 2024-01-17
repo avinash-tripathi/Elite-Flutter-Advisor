@@ -90,6 +90,20 @@ class RoomsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _viewNewAnoIframe = false;
+  bool get viewNewAnoIframe => _viewNewAnoIframe;
+  set viewNewAnoIframe(bool obj) {
+    _viewNewAnoIframe = obj;
+    notifyListeners();
+  }
+
+  bool _viewAnoIframe = false;
+  bool get viewAnoIframe => _viewAnoIframe;
+  set viewAnoIframe(bool obj) {
+    _viewAnoIframe = obj;
+    notifyListeners();
+  }
+
   AnonymousModel? _anonymousUser;
   AnonymousModel? get anonymousUser => _anonymousUser;
   set anonymousUser(AnonymousModel? obj) {
@@ -121,13 +135,12 @@ class RoomsProvider extends ChangeNotifier {
 
   Future<void> startAnonESignatureProcess(AnonymousModel obj) async {
     try {
-      _startESign = true;
+      startESign = true;
       _anonymousUser = await EsignService().startAnonESignatureProcess(obj);
-      _startESign = false;
-
+      startESign = false;
       notifyListeners();
     } catch (e) {
-      _startESign = false;
+      startESign = false;
     }
   }
 

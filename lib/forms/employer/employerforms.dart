@@ -224,7 +224,9 @@ class EmployerForms extends StatelessWidget {
                                                           Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                      .all(8.0),
+                                                                          .only(
+                                                                      left:
+                                                                          8.0),
                                                               child: TooltipWithCopy(
                                                                   employer: prvEmployer
                                                                           .employers[

@@ -1,40 +1,27 @@
 import 'dart:async';
 import 'package:advisorapp/component/customsnakbar.dart';
+import 'package:advisorapp/config/connectionconfig.dart';
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/style/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
-import 'package:advisorapp/config/prod.dart'
-    if (dart.library.html) 'package:advisorapp/config/dev.dart';
 
-/* const String secretID = "b3134070-638c-42ec-b635-64ba32cdef92";
-const String secretValue = "yY78Q~w-IQWGf2tOcDiq5jcrcegOhj8Ueg6odcLK";
-const String applicationclientID = "a5489f64-06e7-4dfa-920c-196436ea8c46";
-const String objectID = "af8ded8d-3bd7-4dc4-a04f-c4b2a8b7bfd2";
-const String directorytenantID = "a66011e6-800e-4e0c-9bed-4d1dd9ba7c9d"; */
+const String webApiserviceURL = ConnectionConfig.webApiserviceURL;
 
-//PROD CONIG
-/* const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
-const String microsoftClientId = '1087cdb1-0c33-4e7f-9c79-24d674d0165f';
-const String microsoftAuthredirectUri = 'https://advisor.alicorn.co/'; */
-
-//DEV CONIG
-const String webApiserviceURL = AppConfig.webApiserviceURL;
-//const String webApiserviceURL = "https://advisorsandbox.azurewebsites.net/api/";
-const String microsoftClientId =
-    AppConfig.microsoftClientId; // 'a5489f64-06e7-4dfa-920c-196436ea8c46';
+const String microsoftClientId = ConnectionConfig
+    .microsoftClientId; // 'a5489f64-06e7-4dfa-920c-196436ea8c46';
 const String microsoftAuthredirectUri =
-    AppConfig.microsoftAuthredirectUri; //'http://localhost:5000/';
+    ConnectionConfig.microsoftAuthredirectUri; //'http://localhost:5000/';
 
-const String basePathOfLogo = AppConfig
+const String basePathOfLogo = ConnectionConfig
     .basePathOfLogo; //'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
-const String defaultimagePath = AppConfig
+const String defaultimagePath = ConnectionConfig
     .defaultimagePath; // 'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/default.png';
-const String defaultActionItemPath = AppConfig.defaultActionItemPath;
+const String defaultActionItemPath = ConnectionConfig.defaultActionItemPath;
 //'https://advisorformsftp.blob.core.windows.net/advisorform/';
 
-const String defaultIdeaPath = AppConfig.defaultIdeaPath;
+const String defaultIdeaPath = ConnectionConfig.defaultIdeaPath;
 //'https://advisorformsftp.blob.core.windows.net/advisorideas/';
 
 // add these in a constant file preferably in constant/dimensions.dart
@@ -312,6 +299,19 @@ bool checkProhibitedEmailDomain(String email) {
         domain == 'rediffmail.com' ||
         domain == 'outlook.com' ||
         domain == 'hotmail.com') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  return false;
+}
+
+bool ifSameDomain(String companydomain, String angainstemail) {
+  // Extract the domain from the email
+  if (angainstemail.contains('@')) {
+    final domain = angainstemail.split('@').last;
+    if (domain == companydomain) {
       return true;
     } else {
       return false;

@@ -74,11 +74,15 @@ class CompanyProfile extends StatelessWidget {
                             ),
                           ),
                           //displayEntryForm()
-                          (loginProvider.logedinUser.companyname.isEmpty &&
+                          (loginProvider.logedinUser.accountcode != '0' &&
+                                  loginProvider
+                                      .logedinUser.companyname.isEmpty &&
                                   loginProvider.adding)
                               ? displayEntryForm(context, formkey)
                               : const Text(''),
-                          (loginProvider.logedinUser.companyname.isNotEmpty)
+                          (loginProvider.logedinUser.accountcode != '0' &&
+                                  loginProvider
+                                      .logedinUser.companyname.isNotEmpty)
                               ? displayEntryForm(context, formkey)
                               : const Text(''),
                         ],

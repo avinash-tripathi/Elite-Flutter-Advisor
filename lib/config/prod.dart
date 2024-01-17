@@ -1,4 +1,6 @@
 class AppConfig {
+  static const baseBlobPath =
+      'https://advisorprodstorage.blob.core.windows.net/';
   static const String webApiserviceURL =
       "https://advisorwebapiprod.azurewebsites.net/api/";
   static const String microsoftClientId =
@@ -6,12 +8,10 @@ class AppConfig {
   static const String microsoftAuthredirectUri = 'https://advisor.alicorn.co/';
 
   static const String basePathOfLogo =
-      'https://advisorprodstorage.blob.core.windows.net/advisorimages/employerlogo/';
+      '${baseBlobPath}advisorimages/employerlogo/';
   static const String defaultimagePath =
-      'https://advisorprodstorage.blob.core.windows.net/advisorimages/employerlogo/default.png';
-  static const String defaultActionItemPath =
-      'https://advisorprodstorage.blob.core.windows.net/advisorform/';
+      '${baseBlobPath}advisorimages/employerlogo/default.png';
+  static const String defaultActionItemPath = '${baseBlobPath}advisorform/';
 
-  static const String defaultIdeaPath =
-      'https://advisorprodstorage.blob.core.windows.net/advisorideas/';
+  static const String defaultIdeaPath = '${baseBlobPath}advisorideas/';
 }

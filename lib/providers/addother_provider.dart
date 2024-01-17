@@ -6,16 +6,7 @@ import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
 
 class AddotherProvider extends ChangeNotifier {
-  /* Map<int, bool> _loadingStatus = {};
-
-  void setLoadingStatus(int index, bool isLoading) {
-    _loadingStatus[index] = isLoading;
-    notifyListeners();
-  }
-
-  bool isLoading(int index) {
-    return _loadingStatus[index] ?? false;
-  } */
+  TextEditingController emailController = TextEditingController();
 
   Map<int, bool> _sendingEmail = {};
 
@@ -75,6 +66,18 @@ class AddotherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _addNewInvite = false;
+  bool get addNewInvite => _addNewInvite;
+  set addNewInvite(bool obj) {
+    _addNewInvite = obj;
+    notifyListeners();
+  }
+
+  void newInvite(Role role, CompanyCategory category) {
+    _currentInvite = AdvisorInvite(role: role, companycategory: category);
+    notifyListeners();
+  }
+
   void addFilteredEmail(Role role, CompanyCategory category) {
     _filteredinvites.add(AdvisorInvite(
         role: role,
@@ -83,6 +86,7 @@ class AddotherProvider extends ChangeNotifier {
         invitedemail: '',
         invitationstatus: '',
         isvalid: false));
+
     _currentInvite = AdvisorInvite(role: role, companycategory: category);
     notifyListeners();
   }
@@ -125,9 +129,10 @@ class AddotherProvider extends ChangeNotifier {
   Future<void> sendEmail(AdvisorInvite obj, int index) async {
     try {
       _sendingEmail[index] = true;
-      await HttpService()
-          .sendEmail(obj)
-          .then((value) => _currentInvite = value);
+      await HttpService().sendEmail(obj).then((value) {
+        _currentInvite = value;
+        _filteredinvites.add(value);
+      });
       _sendingEmail[index] = false;
       _invitingNew = false;
       notifyListeners();

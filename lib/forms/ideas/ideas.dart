@@ -21,6 +21,9 @@ class Ideas extends StatelessWidget {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     final iProvider = Provider.of<IdeaProvider>(context, listen: false);
+    Provider.of<IdeaProvider>(context, listen: false).getIdeas();
+    Provider.of<IdeaProvider>(context, listen: false).getVotes();
+
     return Background(
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (Responsive.isDesktop(context))
@@ -47,9 +50,11 @@ class Ideas extends StatelessWidget {
                     TextButton(
                         onPressed: () {
                           iProvider.addNewIdea = true;
+                          iProvider.ideaController.text = "";
+                          iProvider.descController.text = "";
                         },
                         child: const Text(
-                          '+Make the advisor platform better. Share your idea anonymously and vote on other user’s ideas',
+                          '+ Make the advisor platform better. Share your idea anonymously and vote on other user’s ideas.',
                           style: appstyle,
                         )),
                     const SizedBox(height: 20),
@@ -67,21 +72,24 @@ class Ideas extends StatelessWidget {
                         height: SizeConfig.screenHeight * 3 / 4,
                         child: Consumer<IdeaProvider>(
                             builder: (context, prvRead, child) {
-                          return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: prvRead.ideas.length,
-                              itemBuilder: (context, index) {
-                                return Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      NewIdea(
-                                        idea: prvRead.ideas[index],
-                                        isReadOnly: true,
-                                      )
-                                    ]);
-                              });
+                          return prvRead.reading
+                              ? displaySpin()
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: prvRead.ideas.length,
+                                  itemBuilder: (context, index) {
+                                    return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          NewIdea(
+                                            idea: prvRead.ideas[index],
+                                            isReadOnly: true,
+                                          )
+                                        ]);
+                                  });
                         }))
                   ],
                 ),

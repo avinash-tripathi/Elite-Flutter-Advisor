@@ -36,7 +36,7 @@ class AddAnonymous extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Visibility(
-                      visible: !prvView.viewIframe,
+                      visible: !prvView.viewNewAnoIframe,
                       child: Padding(
                         padding: paddingConfig,
                         child: TextFormField(
@@ -63,7 +63,7 @@ class AddAnonymous extends StatelessWidget {
                       ),
                     ),
                     Visibility(
-                      visible: !prvView.viewIframe,
+                      visible: !prvView.viewNewAnoIframe,
                       child: Padding(
                         padding: paddingConfig,
                         child: SizedBox(
@@ -120,7 +120,7 @@ class AddAnonymous extends StatelessWidget {
                       ),
                     ),
                     Visibility(
-                      visible: !prvView.viewIframe,
+                      visible: !prvView.viewNewAnoIframe,
                       child: SizedBox(
                         width: screenWidth,
                         child: ListTile(
@@ -134,9 +134,9 @@ class AddAnonymous extends StatelessWidget {
                               Tooltip(
                                 decoration: tooltipdecorationGradient,
                                 message:
-                                    "Browse contract file from here to upload",
+                                    "Browse contract file from here to upload.",
                                 child: Visibility(
-                                  visible: !prvView.viewIframe,
+                                  visible: !prvView.viewNewAnoIframe,
                                   child: prvView.uploadingDocument
                                       ? displaySpin()
                                       : SizedBox(
@@ -152,53 +152,58 @@ class AddAnonymous extends StatelessWidget {
                                                   30, // Set the icon color to white
                                             ),
                                             onPressed: () async {
-                                              final lgnProvider =
-                                                  Provider.of<LoginProvider>(
-                                                      context,
-                                                      listen: false);
-                                              bool consent = await EliteDialog(
-                                                  context,
-                                                  "Please Confirm?",
-                                                  "Please note that once the document is sent for eSign,the sender or the receiver won’t be able to change signatories.If signatories need to be changed, you can send a new document for eSign.",
-                                                  "Yes",
-                                                  "No");
-                                              if (!consent) {
-                                                return;
+                                              if (formKey.currentState!
+                                                  .validate()) {
+                                                final lgnProvider =
+                                                    Provider.of<LoginProvider>(
+                                                        context,
+                                                        listen: false);
+                                                bool consent = await EliteDialog(
+                                                    context,
+                                                    "Please confirm",
+                                                    "Please note that once the document is sent for eSign,the sender or the receiver won’t be able to change signatories.If signatories need to be changed, you can send a new document for eSign.",
+                                                    "Yes",
+                                                    "No");
+                                                if (!consent) {
+                                                  return;
+                                                }
+
+                                                AnonymousModel obj =
+                                                    AnonymousModel();
+                                                Account objAcc =
+                                                    lgnProvider.logedinUser;
+
+                                                obj.accountcode =
+                                                    objAcc.accountcode;
+                                                obj.recipient = AnonymousUser(
+                                                    email: prvView
+                                                        .anonymousemailController
+                                                        .text,
+                                                    firstname: prvView
+                                                        .anonymousfirstnameController
+                                                        .text,
+                                                    lastname: prvView
+                                                        .anonymouslastnameController
+                                                        .text,
+                                                    company: "");
+                                                obj.sender = AnonymousUser(
+                                                    email: objAcc.workemail,
+                                                    firstname:
+                                                        objAcc.accountname,
+                                                    lastname: objAcc.lastname,
+                                                    company:
+                                                        objAcc.companyname);
+
+                                                await prvView
+                                                    .pickAnonymousUserFile(obj)
+                                                    .then((model) async => {
+                                                          await prvView
+                                                              .uploadAnonymousDocumentGenerateEmbedURL(
+                                                                  model),
+                                                          prvView.viewNewAnoIframe =
+                                                              true
+                                                        });
                                               }
-
-                                              AnonymousModel obj =
-                                                  AnonymousModel();
-                                              Account objAcc =
-                                                  lgnProvider.logedinUser;
-
-                                              obj.accountcode =
-                                                  objAcc.accountcode;
-                                              obj.recipient = AnonymousUser(
-                                                  email: prvView
-                                                      .anonymousemailController
-                                                      .text,
-                                                  firstname: prvView
-                                                      .anonymousfirstnameController
-                                                      .text,
-                                                  lastname: prvView
-                                                      .anonymouslastnameController
-                                                      .text,
-                                                  company: "");
-                                              obj.sender = AnonymousUser(
-                                                  email: objAcc.workemail,
-                                                  firstname: objAcc.accountname,
-                                                  lastname: objAcc.lastname,
-                                                  company: objAcc.companyname);
-
-                                              await prvView
-                                                  .pickAnonymousUserFile(obj)
-                                                  .then((model) async => {
-                                                        await prvView
-                                                            .uploadAnonymousDocumentGenerateEmbedURL(
-                                                                model),
-                                                        prvView.viewIframe =
-                                                            true
-                                                      });
                                             },
                                             style: ButtonStyle(
                                               backgroundColor:
@@ -210,7 +215,7 @@ class AddAnonymous extends StatelessWidget {
                                 ),
                               ),
                               Visibility(
-                                visible: !prvView.viewIframe,
+                                visible: !prvView.viewNewAnoIframe,
                                 child: SizedBox(
                                   width: 100,
                                   child: IconButton(
@@ -233,7 +238,7 @@ class AddAnonymous extends StatelessWidget {
                     ),
                     Padding(
                         padding: paddingConfig,
-                        child: prvView.viewIframe
+                        child: prvView.viewNewAnoIframe
                             ? SizedBox(
                                 width: screenWidth,
                                 height: SizeConfig.screenHeight,

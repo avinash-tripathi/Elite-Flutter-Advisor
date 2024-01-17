@@ -14,13 +14,12 @@ import 'package:advisorapp/providers/room_provider.dart';
 import 'package:advisorapp/providers/sidebar_provider.dart';
 import 'package:advisorapp/route/route_generator.dart';
 import 'package:advisorapp/style/colors.dart';
-
 import 'package:flutter/material.dart';
 
 //import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:advisorapp/config/prod.dart'
-    if (dart.library.html) 'package:advisorapp/config/dev.dart';
+/* import 'package:advisorapp/config/prod.dart'
+    if (kReleaseMode) 'package:advisorapp/config/dev.dart'; */
 
 //final navigatorKey = GlobalKey<NavigatorState>();
 void main() {
@@ -63,7 +62,7 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    print('API Base URL: ${AppConfig.webApiserviceURL}');
+    //print('API Base URL: ${AppConfig.webApiserviceURL}');
     loadData();
   }
 
@@ -93,8 +92,8 @@ class MyAppState extends State<MyApp> {
           .loadVisibleStatusList(),
       Provider.of<RoomsProvider>(context, listen: false)
           .getAttachmentTypeList(),
-      Provider.of<IdeaProvider>(context, listen: false).getIdeas(),
-      Provider.of<IdeaProvider>(context, listen: false).getVotes(),
+      /* Provider.of<IdeaProvider>(context, listen: false).getIdeas(),
+      Provider.of<IdeaProvider>(context, listen: false).getVotes(), */
       Provider.of<AdminProvider>(context, listen: false).getsubscriptions(),
       Provider.of<AdminProvider>(context, listen: false).readAdminUsers(),
     ]);

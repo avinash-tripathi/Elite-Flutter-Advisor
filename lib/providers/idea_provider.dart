@@ -58,9 +58,9 @@ class IdeaProvider extends ChangeNotifier {
   Future<void> addIdea(Idea obj) async {
     try {
       addingIdea = true;
-      await HttpService().addIdea(obj).then((value) => {
-            _ideas.add(value),
-          });
+      await HttpService()
+          .addIdea(obj)
+          .then((value) => {_ideas.insert(0, value)});
       addingIdea = false;
       notifyListeners();
     } catch (e) {

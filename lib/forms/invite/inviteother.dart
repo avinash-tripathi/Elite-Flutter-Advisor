@@ -3,6 +3,7 @@ import 'package:advisorapp/component/sidemenu.dart';
 import 'package:advisorapp/config/responsive.dart';
 import 'package:advisorapp/config/size_config.dart';
 import 'package:advisorapp/constants.dart';
+import 'package:advisorapp/forms/invite/newinvite.dart';
 import 'package:advisorapp/forms/room/employerinroom.dart';
 import 'package:advisorapp/models/advisorinvitation.dart';
 import 'package:advisorapp/models/basecategory.dart';
@@ -73,15 +74,24 @@ class InviteOther extends StatelessWidget {
                                         e.basecategorycode ==
                                         objBaseC.basecategorycode);
 
-                                addOtherProvider.addFilteredEmail(
-                                    objRole, objCat);
+                                /*  addOtherProvider.addFilteredEmail(
+                                    objRole, objCat); */
+                                addOtherProvider.newInvite(objRole, objCat);
+                                addOtherProvider.addNewInvite = true;
                               },
                               child: const Text(
                                 '+ Advisor platform is by invitation only. Please feel free to invite advisors from your network to join.',
                                 style: appstyle,
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 10),
+                            Consumer<AddotherProvider>(
+                                builder: (context, prvaddOther, child) {
+                              return prvaddOther.addNewInvite
+                                  ? const NewInvite()
+                                  : const Text('');
+                            }),
+                            const SizedBox(height: 10),
                             SizedBox(
                               width: SizeConfig.screenWidth,
                               height: SizeConfig.screenHeight * 3 / 4,
@@ -120,11 +130,9 @@ class InviteOther extends StatelessWidget {
                                                   width: screenWidth * 3 / 4,
                                                   child: TextFormField(
                                                     readOnly: prvaddOther
-                                                            .filteredinvites[
-                                                                index]
-                                                            .invitationstatus
-                                                            .toUpperCase() ==
-                                                        'JOINED',
+                                                        .filteredinvites[index]
+                                                        .invitationstatus
+                                                        .isNotEmpty,
                                                     initialValue: prvaddOther
                                                         .filteredinvites[index]
                                                         .invitedemail,

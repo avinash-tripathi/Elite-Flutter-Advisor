@@ -1,4 +1,5 @@
 class AppConfig {
+  static const baseBlobPath = 'https://advisorformsftp.blob.core.windows.net/';
   static const String webApiserviceURL =
       "https://advisordevelopment.azurewebsites.net/api/";
   static const String microsoftClientId =
@@ -6,12 +7,10 @@ class AppConfig {
   static const String microsoftAuthredirectUri = 'http://localhost:5000/';
 
   static const String basePathOfLogo =
-      'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
+      '${baseBlobPath}advisorimages/employerlogo/';
   static const String defaultimagePath =
-      'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/default.png';
-  static const String defaultActionItemPath =
-      'https://advisorformsftp.blob.core.windows.net/advisorform/';
+      '${baseBlobPath}advisorimages/employerlogo/default.png';
+  static const String defaultActionItemPath = '${baseBlobPath}advisorform/';
 
-  static const String defaultIdeaPath =
-      'https://advisorformsftp.blob.core.windows.net/advisorideas/';
+  static const String defaultIdeaPath = '${baseBlobPath}advisorideas/';
 }

@@ -15,6 +15,7 @@ import 'package:advisorapp/models/role.dart';
 import 'package:advisorapp/models/visibilitystatus.dart';
 import 'package:advisorapp/service/httpservice.dart';
 import 'package:flutter/material.dart';
+import '../constants.dart';
 import '../models/accountaction.dart';
 import '../models/launchstatus.dart';
 import 'dart:html' as html;
@@ -22,8 +23,8 @@ import 'dart:html' as html;
 class EmployerProvider extends ChangeNotifier {
   // ignore: prefer_final_fields
 
-  String basePathOfLogo =
-      'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/';
+  /*  String basePathOfLogo = AppConfig.
+      'https://advisorformsftp.blob.core.windows.net/advisorimages/employerlogo/'; */
 
   TextEditingController companydomainnameController = TextEditingController();
   TextEditingController decisionmakerController = TextEditingController();

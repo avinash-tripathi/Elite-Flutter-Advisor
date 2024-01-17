@@ -480,7 +480,7 @@ class SideMenu extends StatelessWidget {
                         partnerProvider.selectedPartner = objPartner;
 
                         lgnProvider.logedinUser = Account(rolewithemployer: []);
-                        lgnProvider.clearLoggedInCredential();
+
                         lgnProvider.passwordController.text = "";
                         lgnProvider.emailController.text = "";
 
@@ -604,12 +604,7 @@ class SideMenu extends StatelessWidget {
 
     Provider.of<IdeaProvider>(context, listen: false).ideas.clear();
     Provider.of<IdeaProvider>(context, listen: false).votes.clear();
-    /*   Provider.of<LaunchProvider>(context, listen: false)
-        .attachmentTypeList
-        .clear(); */
-    /*  Provider.of<LaunchProvider>(context, listen: false).itemStatusList.clear(); */
     Provider.of<LaunchProvider>(context, listen: false).launchpacks.clear();
-
     Provider.of<PartnerProvider>(context, listen: false).partners.clear();
 
     Provider.of<PartnerProvider>(context, listen: false)
